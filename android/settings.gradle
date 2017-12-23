@@ -1,0 +1,3 @@
+rootProject.name = 'wbergapp'
+
+include ':app'
