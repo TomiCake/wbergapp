@@ -15,9 +15,9 @@ import { Provider } from 'react-redux';
 import devToolsEnhancer from 'remote-redux-devtools';
 
 import authReducer from './src/Login/reducer';
-import timetableReducer from './src/Timetable/reducer';
+import timetableReducer from './src/TimetableView/reducer';
 import LoginBearer from './src/Login/LoginBearer';
-import Timetable from './src/Timetable';
+import TimetableView from './src/TimetableView';
 
 const config = {
     key: 'root',
@@ -48,7 +48,7 @@ export default class App extends Component {
                             title="safd"
                             onPress={() => store.dispatch({type: 'SET_TOKEN', token: null})}>
                         </Button>
-                        <Timetable />
+                        <TimetableView />
                     </LoginBearer>
 
                 </PersistGate>
