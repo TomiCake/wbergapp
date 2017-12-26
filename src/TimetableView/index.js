@@ -3,6 +3,7 @@ import { ActivityIndicator, View, Text } from 'react-native';
 import styles from './styles';
 import { connect } from 'react-redux';
 import { getMasterdata, getTimetable } from './api';
+import Timetable from '../Timetable';
 
 class TimetableView extends Component {
 
@@ -11,7 +12,7 @@ class TimetableView extends Component {
         this.state = {
             error: null,
             myTimetable: null,
-            loading: null,
+            loading: "null",
         };
 
     }
@@ -27,6 +28,7 @@ class TimetableView extends Component {
         }
         this.setState({ loading: "Stundenplandaten" });
         let timetable = await getTimetable(this.props.token, this.props.id.type, this.props.id.id);
+        
         this.setState({ loading: null, myTimetable: timetable });
     }
 
@@ -44,7 +46,9 @@ class TimetableView extends Component {
                     </View>
                     : 
                     <Timetable
-                        data={this.state.timetable}>
+                        data={this.state.myTimetable}
+                        masterdata={this.props.masterdata}
+                    >
                     </Timetable>
                 }
             </View>
@@ -55,6 +59,7 @@ class TimetableView extends Component {
 export default connect((state) => {
     return {
         token: state.auth.token,
+        masterdata: state.timetable.masterdata,
         masterdataVersion: state.timetable.masterdata.version,
         id: state.auth.id
     };

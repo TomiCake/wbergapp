@@ -44,10 +44,6 @@ export default class App extends Component {
                     persistor={persistor}>
 
                     <LoginBearer>
-                        <Button
-                            title="safd"
-                            onPress={() => store.dispatch({type: 'SET_TOKEN', token: null})}>
-                        </Button>
                         <TimetableView />
                     </LoginBearer>
 

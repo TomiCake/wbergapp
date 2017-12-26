@@ -48,8 +48,8 @@ export class LoginScreen extends Component {
             .then((data) => {
                 console.log(data);
                 this.setState({ error: null, loggingIn: false });
-                this.props.setToken(data.token);
                 this.props.setId(data.id);
+                this.props.setToken(data.token);
             })
             .catch((error) => {
                 console.log(error);
