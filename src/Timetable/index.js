@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
 import styles from './styles';
 import PropTypes from 'prop-types';
-import { View } from 'react-native';
-import WeekView from './WeekView';
-import LessonView from './LessonView';
+import { View, Text } from 'react-native';
+import GridA from './GridA';
+import Lesson from './Lesson';
+import AppBar from './AppBar';
 
 export default class Timetable extends Component {
     static propTypes = {
@@ -16,47 +17,41 @@ export default class Timetable extends Component {
         const masterdata = this.props.masterdata;
 
         let periods = timetable[day][p];
-        if (periods)
-            periods = periods.map((period) => {
-                let subs = null;
-                if (this.substitutions && this.substitutions.substitutions) {
-                    subs = this.substitutions.substitutions
-                        .filter((elem) =>
-                            elem.PERIOD === p &&
-                            elem.LESSON_ID === period.LESSON_ID &&
-                            elem.TEACHER_ID === period.TEACHER_ID
-                        )
-                        .map((substitution) => {
-                            return {
-                                orig: substitution,
-                                flagsOrig: substitution.FLAGS,
-                                flags: toObject(substitution.FLAGS),
-                                teacher: props.teachers[substitution.TEACHER_ID_NEW],
-                                subject: props.subjects[substitution.SUBJECT_ID_NEW],
-                                room: props.rooms[substitution.ROOM_ID_NEW],
-                                text: substitution.TEXT
-                            };
-                        });
+        if (!periods) return;
+        periods = periods.map((period) => ({
+            teacher: masterdata.Teacher[period.TEACHER_ID],
+            subject: masterdata.Subject[period.SUBJECT_ID],
+            room: masterdata.Room[period.ROOM_ID],
+            classes: period.CLASS_IDS.map((c) => masterdata.Class[c].NAME),
+        }));
+        return this.renderLessonView(periods);
+    }
 
-                }
-                let obj = {
-                    teacher: masterdata.Teacher[period.TEACHER_ID],
-                    subject: masterdata.Subject[period.SUBJECT_ID],
-                    room: masterdata.Room[period.ROOM_ID],
-                    classes: period.CLASS_IDS.map((c) => masterdata.Class[c].NAME),
-                    substitutions: subs
+    renderLessonView(periods) {
+        return (
+            <View style={{ flex: 1 }}>
+                <Text>{periods[0].teacher.NAME}</Text>
 
-                };
-                return obj;
-            });
-        return <LessonView periods={periods}  />;
+            </View>
+        );
+    }
+
+    onCellLayout(cellPositions) {
+        console.log(cellPositions);
+
     }
 
     render() {
         return (
-            <WeekView
-                amount={2}
-                renderLesson={this.renderLesson}/>
+            <View style={styles.container}>
+                <AppBar />
+                <View style={styles.container}>
+                    <GridA onCellLayout={this.onCellLayout} />
+                    <View>
+                        <Lesson />
+                    </View>
+                </View>
+            </View>
         );
     }
 }

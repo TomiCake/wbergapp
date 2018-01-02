@@ -18,18 +18,25 @@ class TimetableView extends Component {
     }
 
     async componentDidMount() {
-        let version = (await getMasterdata(this.props.token, 'version')).version;
-        this.setState({ loading: "Anzeigedaten" });
-        if (this.props.masterdataVersion !== version) {
-            let masterdata = await getMasterdata(this.props.token, 'all');
-            console.log("reloaded masterdata");
+        try {
+            let version = (await getMasterdata(this.props.token, 'version')).version;
+            this.setState({ loading: "Anzeigedaten" });
+            if (this.props.masterdataVersion !== version) {
+                let masterdata = await getMasterdata(this.props.token, 'all');
+                console.log("reloaded masterdata");
 
-            this.props.setMasterdata(masterdata);
-        }
-        this.setState({ loading: "Stundenplandaten" });
-        let timetable = await getTimetable(this.props.token, this.props.id.type, this.props.id.id);
+                this.props.setMasterdata(masterdata);
+            }
+            this.setState({ loading: "Stundenplandaten" });
+            let timetable = await getTimetable(this.props.token, this.props.id.type, this.props.id.id);
         
-        this.setState({ loading: null, myTimetable: timetable });
+            this.setState({ loading: null, myTimetable: timetable });
+        } catch (error) {
+            console.log("error while loading TimetableView", error);
+            if (error.status === 'token_error') {
+                this.props.resetToken();
+            }
+        }    
     }
 
     render() {
@@ -65,6 +72,7 @@ export default connect((state) => {
     };
 }, (dispatch) => {
     return {
-        setMasterdata: (masterdata) => dispatch({ type: 'SET_MASTERDATA', payload: masterdata })
+        setMasterdata: (masterdata) => dispatch({ type: 'SET_MASTERDATA', payload: masterdata }),
+        resetToken: () => dispatch({type: 'SET_TOKEN', payload: null})
     }
 })(TimetableView);

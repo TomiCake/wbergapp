@@ -18,6 +18,16 @@ import authReducer from './src/Login/reducer';
 import timetableReducer from './src/TimetableView/reducer';
 import LoginBearer from './src/Login/LoginBearer';
 import TimetableView from './src/TimetableView';
+import {
+    setCustomText,
+} from 'react-native-global-props';
+
+setCustomText({
+    style: {
+        fontFamily: Platform.OS === 'ios' ? 'HelveticaNeue' : 'sans-serif-light',
+        color: 'black'
+    }
+});
 
 const config = {
     key: 'root',
