@@ -82,10 +82,7 @@ export class LoginScreen extends Component {
                         style={styles.container}>
                         <TouchableWithoutFeedback
                             onPress={Keyboard.dismiss}>
-
-
-
-                            <View
+                         <View
                                 style={styles.card}>
                                 <ScrollView>
                                     <View style={styles.cardHeader}>

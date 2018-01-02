@@ -12,8 +12,8 @@ export default StyleSheet.create({
     cell: {
         borderBottomWidth: 1,
         borderRightWidth: 1,
-        borderColor: '#bbdefb',
-        backgroundColor: '#e1f5fe',
+        borderColor: '#212121',
+        backgroundColor: '#212121',
         flex: 1,
     },
     headerColumn: {
@@ -29,29 +29,36 @@ export default StyleSheet.create({
         paddingHorizontal: 10,
         justifyContent: 'center',
         flex: 1,
-        backgroundColor: '#b3e5fc',
-        alignItems: 'center'
+        backgroundColor: '#212121',
+        alignItems: 'center',
+        width: 40,
     },
     weekday: {
         fontSize: 12,
         fontWeight: 'bold',
         width: '100%',
-        textAlign: 'center'
+        textAlign: 'center',
+        color: '#cccccc'
     },
 
     headerRowCell: {
-        height: 30,
-        backgroundColor: '#b3e5fc',
+        height: 40,
+        backgroundColor: '#212121',
         padding: 5,
         justifyContent: 'center'
     },
 
+    period: {
+        color: 'white'
+    },
+
     time: {
-        fontSize: 7
+        fontSize: 7,
+        color: 'white'
     },
     
     accent: {
-        backgroundColor: '#d8ebf4'
+        backgroundColor: '#1b1b1b'
     },
 
     container: {

@@ -7,9 +7,11 @@ export default StyleSheet.create({
         paddingVertical: 4,
         paddingHorizontal: 8,
         alignItems: 'center',
-        backgroundColor: '#0d47a1'
+        backgroundColor: '#002171',
+        elevation: 1,
     },
     title: {
+        flex: 1,
         color: 'white',
         fontSize: 17,
     }

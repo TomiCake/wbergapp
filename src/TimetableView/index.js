@@ -55,6 +55,7 @@ class TimetableView extends Component {
                     <Timetable
                         data={this.state.myTimetable}
                         masterdata={this.props.masterdata}
+                        type={this.props.id.type}
                     >
                     </Timetable>
                 }
