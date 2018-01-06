@@ -38,16 +38,17 @@ export default StyleSheet.create({
     weekday: {
         fontSize: 12,
         fontWeight: 'bold',
-        width: '100%',
         textAlign: 'center',
         color: '#cccccc'
     },
 
     headerRowCell: {
-        height: 40,
         backgroundColor: '#212121',
         padding: 5,
-        justifyContent: 'center'
+        justifyContent: 'center',
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        flex: 1,
     },
 
     period: {

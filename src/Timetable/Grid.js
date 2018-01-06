@@ -3,6 +3,7 @@ import { View, Text } from 'react-native';
 import styles from './styles';
 import moment from 'moment';
 
+import { WEEKDAY_NAMES } from '../../const';
 
 export default class Grid extends Component {
 
@@ -11,10 +12,10 @@ export default class Grid extends Component {
     setLayout(x, y) {
         return (layout) => {
             this.cellPositions[x - 1][y - 1] = {
-                left: (x-1) * layout.nativeEvent.layout.width + 40,
+                left: (x - 1) * layout.nativeEvent.layout.width + 40,
                 top: layout.nativeEvent.layout.y,
-                width: layout.nativeEvent.layout.width-1,
-                height: layout.nativeEvent.layout.height-1,
+                width: layout.nativeEvent.layout.width - 1,
+                height: layout.nativeEvent.layout.height - 1,
             };
         }
     }
@@ -22,23 +23,32 @@ export default class Grid extends Component {
     renderColumn(i) {
         return (
             <View key={i} style={[styles.column]}>
-                <View key={0} style={[styles.headerRowCell, styles.accent]}>
-                    <Text style={styles.weekday} numberOfLines={1}>
-                        {['', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag'][i]}
-                    </Text>
-                    <Text style={styles.weekday} numberOfLines={1}>
-                        {moment(this.props.monday).add(i-1, 'days').format("DD.MM")}
-                    </Text>
-                </View>
+
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((y) => this.renderCell(i, y))}
             </View>
         );
     }
 
+    renderHeaderRow() {
+        return (
+            <View style={styles.row}>
+                <View key={10} style={[styles.headerCell, {flex: 0}, styles.accent]}></View>
+                {WEEKDAY_NAMES.map((name, i) => (
+                    <View key={i} style={[styles.headerRowCell, styles.accent]}>
+                        <Text style={styles.weekday} numberOfLines={1}>
+                            {name}
+                        </Text>
+                        <Text style={styles.weekday} numberOfLines={1}>
+                            {moment(this.props.monday).add(i - 1, 'days').format(" DD.MM")}
+                        </Text>
+                    </View>
+                ))}
+            </View>);
+    }
+
     renderHeaderColumn(i) {
         return (
             <View key={i} style={[styles.column, styles.headerColumn]}>
-                <View key={0} style={[styles.headerRowCell, styles.accent]}><Text> </Text></View>
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(this.renderTimeCell)}
             </View>
         )
@@ -64,10 +74,16 @@ export default class Grid extends Component {
 
     render() {
         return (
-            <View style={styles.grid}>
-                {this.renderHeaderColumn(0)}
-                {[1, 2, 3, 4, 5].map((i) => this.renderColumn(i))}
+            <View style={{ flex: 1 }}>
+                {this.renderHeaderRow()}
+                <View style={{ flex: 1 }}>
+                    <View style={styles.grid}>
+                        {this.renderHeaderColumn(0)}
+                        {[1, 2, 3, 4, 5].map((i) => this.renderColumn(i))}
 
+                    </View>
+                    {this.props.children}
+                </View>
             </View>
         );
     }

@@ -179,8 +179,7 @@ export default class Timetable extends Component {
                     <Grid
                         ref="grid"
                         monday={moment().isoWeekday(1)}
-                    />
-
+                    >
                     <View style={{ position: 'absolute', width: '100%', height: '100%' }}>
                         {this.state.cellPositions ?
                             this.renderWeek(this.state.data)
@@ -188,6 +187,9 @@ export default class Timetable extends Component {
                             <ActivityIndicator size={80} />
                         }
                     </View>
+                    </Grid>
+
+                    
 
                 </View>
             </View>
