@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { ActivityIndicator, View, Text } from 'react-native';
 import styles from './styles';
 import { connect } from 'react-redux';
-import { getMasterdata, getTimetable } from './api';
+import { getMasterdata, getTimetable, getSubstitutions } from './api';
 import Timetable from '../Timetable';
 
 class TimetableView extends Component {
@@ -12,7 +12,7 @@ class TimetableView extends Component {
         this.state = {
             error: null,
             myTimetable: null,
-            loading: "null",
+            loading: "",
         };
 
     }
@@ -29,8 +29,11 @@ class TimetableView extends Component {
             }
             this.setState({ loading: "Stundenplandaten" });
             let timetable = await getTimetable(this.props.token, this.props.id.type, this.props.id.id);
-        
-            this.setState({ loading: null, myTimetable: timetable });
+
+            let substitutions = await getSubstitutions(this.props.token, this.props.id.type, this.props.id.id, '2018', '1');
+            this.setState({ loading: null, myTimetable: timetable, substitutions });
+
+
         } catch (error) {
             console.log("error while loading TimetableView", error);
             if (error.status === 'token_error') {
@@ -44,7 +47,7 @@ class TimetableView extends Component {
             <View style={styles.container}>
                 {this.state.error ? <Text style={styles.error}>{this.state.error}</Text> : null}
 
-                {this.state.loading ?
+                {this.state.loading !== null ?
                     <View style={styles.loadingBox}>
                         <ActivityIndicator
                             size={80}
@@ -54,6 +57,7 @@ class TimetableView extends Component {
                     : 
                     <Timetable
                         data={this.state.myTimetable}
+                        substitutions={this.state.substitutions}
                         masterdata={this.props.masterdata}
                         type={this.props.id.type}
                     >

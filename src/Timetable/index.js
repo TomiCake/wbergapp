@@ -4,9 +4,10 @@ import PropTypes from 'prop-types';
 import { View, Text, ActivityIndicator } from 'react-native';
 import moment from 'moment';
 import Grid from './Grid';
+import GridAlignedBox from './GridAlignedBox';
 import Period from './Period';
 import AppBar from './AppBar';
-import { PERIOD_NUMBERS, WEEKDAY_NAMES } from '../../const';
+import { PERIOD_NUMBERS, WEEKDAY_NAMES, PERIOD_BGCOLOR, HOLIDAY_BGCOLOR } from '../../const';
 
 export default class Timetable extends Component {
     static propTypes = {
@@ -19,35 +20,73 @@ export default class Timetable extends Component {
         this.state = {
 
         };
-
         let data = [];
-        const timetable = this.props.data;
-
 
         for (x = 0; x < WEEKDAY_NAMES.length; x++) {
-            data[x] = [];
-            for (y = 0; y < PERIOD_NUMBERS.length; y++) {
-                current = timetable[x + 1][y + 1];
-                let c = data[x][y] = { lessons: this.translate(current), skip: 0 };
-                while (y < PERIOD_NUMBERS.length && this.comparePeriod(current, timetable[x + 1][y + 2])) {
-                    c.skip++;
-                    y++;
-                }
-            }
+            let day = this.readTimetable(x);
+            this.joinSubstitutions(day, this.props.substitutions[x + 1]);
+            this.skipDuplications(day);
+            this.translatePeriods(day);
+            data[x] = day;
         }
+
         this.state.data = data;
     }
 
-    translate = (lessons) => {
+    readTimetable(day) {
+        let data = [];
+        for (y = 0; y < PERIOD_NUMBERS.length; y++) {
+            data[y] = { lessons: this.props.data[day + 1][y + 1] };
+        }
+        return { periods: data };
+    }
+
+    joinSubstitutions(day, subOnDay) {
+        if (subOnDay.holiday) {
+            day.holiday = subOnDay.holiday;
+            day.periods = undefined;
+        }
+        for (y = 0; y < PERIOD_NUMBERS.length; y++) {
+        }
+    }
+
+    skipDuplications(day) {
+        if (day.holiday) {
+            return day;
+        }
+        for (y = 0; y < PERIOD_NUMBERS.length; y++) {
+            let current = day.periods[y];
+            current.skip = 0;
+            while (y + 1 < PERIOD_NUMBERS.length && this.comparePeriod(current.lessons, day.periods[y + 1].lessons)) {
+                y++;
+                delete day.periods[y];
+                current.skip++;
+            }
+        }
+    }
+
+    translatePeriods(day) {
+        if (day.holiday) {
+            return day;
+        }
+        for (y = 0; y < PERIOD_NUMBERS.length; y++) {
+            if (day.periods[y] && day.periods[y].lessons) {
+                this.translate(day.periods[y]);
+            }
+        }
+    }
+
+
+    translate(period) {
+        if (!period) return period;
         const masterdata = this.props.masterdata;
-        if (!lessons) return lessons;
-        lessons = lessons.map((period) => ({
+        period.lessons = period.lessons.map((period) => ({
             teacher: masterdata.Teacher[period.TEACHER_ID],
             subject: masterdata.Subject[period.SUBJECT_ID],
             room: masterdata.Room[period.ROOM_ID],
             classes: period.CLASS_IDS.map((c) => masterdata.Class[c].NAME),
         }));
-        return lessons;
+        return period;
     }
 
     onCellLayout = (cellPositions) => {
@@ -81,29 +120,53 @@ export default class Timetable extends Component {
         return true;
     }
 
-
-    render() {
+    renderPeriods(day, periods) {
         const cellPositions = this.state.cellPositions;
-        console.log(cellPositions);
+        let periodComponents = [];
+        for (y = 0; y < PERIOD_NUMBERS.length; y++) {
+            let period = periods[y];
+            if (!period || !period.lessons) continue;
+            periodComponents.push(
+                <GridAlignedBox
+                    expandable
+                    key={day * 10 + y}
+                    skip={period.skip}
+                    backgroundColor={PERIOD_BGCOLOR}
+                    boundingBox={cellPositions[day][y]}
+                    renderContent={(horizontal) => <Period
+                        type={this.props.type}
+                        data={period.lessons}
+                        horizontal={horizontal} />} />
+            );
+        }
+        return periodComponents;
+    }
 
-        let periods = [];
-        if (cellPositions) {
-            for (x = 0; x < WEEKDAY_NAMES.length; x++) {
-                for (y = 0; y < PERIOD_NUMBERS.length; y++) {
-                    let data = this.state.data[x][y];
-                    if (!data || !data.lessons) continue;
-                    periods.push(
-                        <Period
-                            data={data.lessons}
-                            key={x * 10 + y}
-                            skip={data.skip}
-                            type={this.props.type}
-                            backgroundColor="#3e2723"
-                            boundingBox={cellPositions[x][y]} />
-                    );
-                }
+    renderWeek = (timetable) => {
+        let components = [];
+        const cellPositions = this.state.cellPositions;
+        for (x = 0; x < WEEKDAY_NAMES.length; x++) {
+            let day = this.state.data[x];
+            if (day.holiday) {
+                components.push(
+                    <GridAlignedBox
+                        key={x}
+                        skip={PERIOD_NUMBERS.length - 1}
+                        backgroundColor={HOLIDAY_BGCOLOR}
+                        boundingBox={cellPositions[x][0]}
+                        contentContainerStyle={{flexDirection: 'column', justifyContent: 'center'}}
+                        renderContent={(horizontal) => (
+                                <Text style={styles.holiday}>{day.holiday}</Text>
+                        )} />);
+            }
+            if (day.periods) {
+                components.push(...this.renderPeriods(x, day.periods));
             }
         }
+        return components;
+    }
+
+    render() {
 
         return (
             <View style={styles.container}>
@@ -119,8 +182,8 @@ export default class Timetable extends Component {
                     />
 
                     <View style={{ position: 'absolute', width: '100%', height: '100%' }}>
-                        {cellPositions ?
-                            periods
+                        {this.state.cellPositions ?
+                            this.renderWeek(this.state.data)
                             :
                             <ActivityIndicator size={80} />
                         }

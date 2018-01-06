@@ -20,6 +20,8 @@ export default StyleSheet.create({
         flex: 0,
         
     },
+    holiday: {
+    },
     grid: {
         flexDirection: 'row',
         flex: 1,

@@ -33,8 +33,13 @@ export default StyleSheet.create({
     row: {
         flexDirection: 'row',
         alignItems: 'center',
+        
     },
+    
     column: {
         flexDirection: 'column',
+    },
+    flex: {
+        flex: 1
     }
 });
