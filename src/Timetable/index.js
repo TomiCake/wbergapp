@@ -31,18 +31,14 @@ export default class Timetable extends Component {
 
     parse() {
         let data = [];
-        try {
-            for (x = 0; x < WEEKDAY_NAMES.length; x++) {
-                let day = this.readTimetable(x);
-                this.joinSubstitutions(day, this.props.substitutions[x + 1]);
-                this.skipDuplications(day);
-                this.translatePeriods(day);
-                data[x] = day;
-            }
-        } catch (error) {
-            this.props.onError(error);
-            console.error(new Error(error));
+        for (x = 0; x < WEEKDAY_NAMES.length; x++) {
+            let day = this.readTimetable(x);
+            this.joinSubstitutions(day, this.props.substitutions[x + 1]);
+            this.skipDuplications(day);
+            this.translatePeriods(day);
+            data[x] = day;
         }
+
         console.log(data);
         return data;
 
@@ -52,7 +48,7 @@ export default class Timetable extends Component {
         let data = [];
         for (y = 0; y < PERIOD_NUMBERS.length; y++) {
             let lessons = this.props.data[day + 1][y + 1];
-            if(lessons){
+            if (lessons) {
                 lessons = [...lessons];
             }
             data[y] = { lessons };
@@ -69,18 +65,18 @@ export default class Timetable extends Component {
 
             subOnDay.substitutions.forEach((substitution) => {
                 let period = day.periods[substitution.PERIOD - 1];
+                if(!period) return;
                 let lessons = period.lessons;
                 if (lessons) {
                     for (i = 0; i < lessons.length; i++) {
                         let lesson = lessons[i];
                         if (lesson.TIMETABLE_ID === substitution.TIMETABLE_ID) {
-                            console.log(lesson, substitution);
                             lessons[i] = {
                                 substitutionType: 'SUBSTITUTION',
-                                CLASS_IDS: [substitution.CLASS_IDS],
-                                TEACHER_ID: substitution.TEACHER_ID_NEW || lesson[i].TEACHER_ID,
-                                SUBJECT_ID: substitution.SUBJECT_ID_NEW || lesson[i].SUBJECT_ID,
-                                ROOM_ID: substitution.ROOM_ID_NEW || lesson[i].ROOM_ID,
+                                CLASS_IDS: [],
+                                TEACHER_ID: substitution.TEACHER_ID_NEW || lesson.TEACHER_ID,
+                                SUBJECT_ID: substitution.SUBJECT_ID_NEW || lesson.SUBJECT_ID,
+                                ROOM_ID: substitution.ROOM_ID_NEW || lesson.ROOM_ID,
                             };
                             break;
                         }
@@ -92,7 +88,7 @@ export default class Timetable extends Component {
                     }
                     lessons.push({
                         substitutionType: 'SUBSTITUTION',
-                        CLASS_IDS: [substitution.CLASS_IDS],
+                        CLASS_IDS: [],
                         TEACHER_ID: substitution.TEACHER_ID_NEW,
                         SUBJECT_ID: substitution.SUBJECT_ID_NEW,
                         ROOM_ID: substitution.ROOM_ID_NEW,
@@ -135,12 +131,13 @@ export default class Timetable extends Component {
     translate(period) {
         if (!period) return period;
         const masterdata = this.props.masterdata;
+        console.log(period);
         period.lessons = period.lessons.map((period) => ({
             substitutionType: period.substitutionType,
             teacher: masterdata.Teacher[period.TEACHER_ID],
             subject: masterdata.Subject[period.SUBJECT_ID],
             room: masterdata.Room[period.ROOM_ID],
-            classes: period.CLASS_IDS.map((c) => masterdata.Class[`${c}`].NAME),
+            classes: period.CLASS_IDS.map((c) => masterdata.Class[c].NAME),
         }));
         return period;
     }

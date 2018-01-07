@@ -9,8 +9,6 @@ export default class GridAlignedBox extends Component {
 
     constructor(props) {
         super(props);
-        LayoutAnimation.spring();
-
         this.state = {
             toggled: false,
         }
@@ -18,11 +16,6 @@ export default class GridAlignedBox extends Component {
 
     toggle = (e) => {
         this.setState({ toggled: !this.state.toggled });
-        // LayoutAnimation.spring();
-    }
-    
-    componentWillUpdate() {
-        // LayoutAnimation.spring();
     }
 
     render() {
