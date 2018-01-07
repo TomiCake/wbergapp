@@ -14,5 +14,8 @@ export default StyleSheet.create({
         flex: 1,
         color: 'white',
         fontSize: 17,
+    },
+    buttons: {
+        flexDirection: 'row'
     }
 });

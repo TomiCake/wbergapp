@@ -1,13 +1,15 @@
 import React, { Component } from 'react';
 
-import { View, Text, ScrollView, Animated, TouchableWithoutFeedback, TouchableOpacity, TouchableNativeFeedback, TouchableHighlight, Dimensions } from 'react-native';
+import { UIManager, View, Text, ScrollView, Animated, TouchableWithoutFeedback, TouchableOpacity, TouchableNativeFeedback, TouchableHighlight, Dimensions, LayoutAnimation } from 'react-native';
 import styles from './gridAlignedBox.styles';
+UIManager.setLayoutAnimationEnabledExperimental &&
+    UIManager.setLayoutAnimationEnabledExperimental(true);
 
 export default class GridAlignedBox extends Component {
 
     constructor(props) {
         super(props);
-
+        LayoutAnimation.spring();
 
         this.state = {
             toggled: false,
@@ -16,6 +18,11 @@ export default class GridAlignedBox extends Component {
 
     toggle = (e) => {
         this.setState({ toggled: !this.state.toggled });
+        // LayoutAnimation.spring();
+    }
+    
+    componentWillUpdate() {
+        // LayoutAnimation.spring();
     }
 
     render() {
@@ -24,7 +31,7 @@ export default class GridAlignedBox extends Component {
             + this.props.skip - 2 * margin;
 
 
-        const computedStyle = {
+        let computedStyle = {
             top: this.props.boundingBox.top + margin,
             left: this.props.boundingBox.left + margin,
             width: this.props.boundingBox.width - 2 * margin,
@@ -34,11 +41,16 @@ export default class GridAlignedBox extends Component {
             zIndex: this.state.toggled ? 3 : 0,
             backgroundColor: this.state.toggled ? '#383847' : this.props.backgroundColor
         }
-        const dimenions = Dimensions.get('window');
-        computedStyle.left = Math.min(dimenions.width - computedStyle.width, computedStyle.left);
-        computedStyle.top = Math.min(dimenions.height - 50, computedStyle.top);
+        if (this.state.toggled) {
+            computedStyle.left -= this.props.boundingBox.width / 2;
+            computedStyle.width += this.props.boundingBox.width;
+        }
 
-        const horizontal = this.props.boundingBox.width > this.props.boundingBox.height * 1.5;
+        const dimenions = Dimensions.get('window');
+        computedStyle.left = Math.min(dimenions.width - computedStyle.width, Math.max(computedStyle.left, 10));
+        computedStyle.top = Math.min(dimenions.height - 50, Math.max(computedStyle.top, 0));
+
+        const horizontal = computedStyle.width > this.props.boundingBox.height * 1.5;
 
 
         return (

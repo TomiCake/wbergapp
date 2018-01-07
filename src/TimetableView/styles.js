@@ -5,10 +5,16 @@ export default StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
     },
+    flex: {
+        flex: 1,
+    },
     error: {
         color: 'red',
     },
     loadingBox: {
         alignItems: 'center'
+    },
+    errorContainer: {
+        justifyContent: 'center'
     }
 });

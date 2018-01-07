@@ -18,6 +18,7 @@ import authReducer from './src/Login/reducer';
 import timetableReducer from './src/TimetableView/reducer';
 import LoginBearer from './src/Login/LoginBearer';
 import TimetableView from './src/TimetableView';
+import SearchView from './src/SearchView';
 import {
     setCustomText,
 } from 'react-native-global-props';
@@ -41,7 +42,7 @@ const reducer = persistCombineReducers(config, {
     timetable: timetableReducer,
 });
 
-const store = createStore(reducer, devToolsEnhancer());
+const store = createStore(reducer, window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__());
 const persistor = persistStore(store);
 
 

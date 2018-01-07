@@ -6,8 +6,8 @@ import moment from 'moment';
 import Grid from './Grid';
 import GridAlignedBox from './GridAlignedBox';
 import Period from './Period';
-import AppBar from './AppBar';
 import { PERIOD_NUMBERS, WEEKDAY_NAMES, PERIOD_BGCOLOR, HOLIDAY_BGCOLOR } from '../../const';
+import Swiper from './Swiper';
 
 export default class Timetable extends Component {
     static propTypes = {
@@ -20,35 +20,90 @@ export default class Timetable extends Component {
         this.state = {
 
         };
+
+
+        this.state.data = this.parse();
+    }
+
+    componentWillUpdate() {
+        this.state.data = this.parse();
+    }
+
+    parse() {
         let data = [];
-
-        for (x = 0; x < WEEKDAY_NAMES.length; x++) {
-            let day = this.readTimetable(x);
-            this.joinSubstitutions(day, this.props.substitutions[x + 1]);
-            this.skipDuplications(day);
-            this.translatePeriods(day);
-            data[x] = day;
+        try {
+            for (x = 0; x < WEEKDAY_NAMES.length; x++) {
+                let day = this.readTimetable(x);
+                this.joinSubstitutions(day, this.props.substitutions[x + 1]);
+                this.skipDuplications(day);
+                this.translatePeriods(day);
+                data[x] = day;
+            }
+        } catch (error) {
+            this.props.onError(error);
+            console.error(new Error(error));
         }
+        console.log(data);
+        return data;
 
-        this.state.data = data;
     }
 
     readTimetable(day) {
         let data = [];
         for (y = 0; y < PERIOD_NUMBERS.length; y++) {
-            data[y] = { lessons: this.props.data[day + 1][y + 1] };
+            let lessons = this.props.data[day + 1][y + 1];
+            if(lessons){
+                lessons = [...lessons];
+            }
+            data[y] = { lessons };
         }
         return { periods: data };
     }
 
     joinSubstitutions(day, subOnDay) {
+        if (!subOnDay) return;
         if (subOnDay.holiday) {
             day.holiday = subOnDay.holiday;
             day.periods = undefined;
+        } else if (subOnDay.substitutions && day.periods) {
+
+            subOnDay.substitutions.forEach((substitution) => {
+                let period = day.periods[substitution.PERIOD - 1];
+                let lessons = period.lessons;
+                if (lessons) {
+                    for (i = 0; i < lessons.length; i++) {
+                        let lesson = lessons[i];
+                        if (lesson.TIMETABLE_ID === substitution.TIMETABLE_ID) {
+                            console.log(lesson, substitution);
+                            lessons[i] = {
+                                substitutionType: 'SUBSTITUTION',
+                                CLASS_IDS: [substitution.CLASS_IDS],
+                                TEACHER_ID: substitution.TEACHER_ID_NEW || lesson[i].TEACHER_ID,
+                                SUBJECT_ID: substitution.SUBJECT_ID_NEW || lesson[i].SUBJECT_ID,
+                                ROOM_ID: substitution.ROOM_ID_NEW || lesson[i].ROOM_ID,
+                            };
+                            break;
+                        }
+                    }
+                }
+                if (substitution.TIMETABLE_ID === null) {
+                    if (!lessons) {
+                        period.lessons = lessons = [];
+                    }
+                    lessons.push({
+                        substitutionType: 'SUBSTITUTION',
+                        CLASS_IDS: [substitution.CLASS_IDS],
+                        TEACHER_ID: substitution.TEACHER_ID_NEW,
+                        SUBJECT_ID: substitution.SUBJECT_ID_NEW,
+                        ROOM_ID: substitution.ROOM_ID_NEW,
+                    });
+                }
+            });
         }
-        for (y = 0; y < PERIOD_NUMBERS.length; y++) {
-        }
+
     }
+
+
 
     skipDuplications(day) {
         if (day.holiday) {
@@ -81,10 +136,11 @@ export default class Timetable extends Component {
         if (!period) return period;
         const masterdata = this.props.masterdata;
         period.lessons = period.lessons.map((period) => ({
+            substitutionType: period.substitutionType,
             teacher: masterdata.Teacher[period.TEACHER_ID],
             subject: masterdata.Subject[period.SUBJECT_ID],
             room: masterdata.Room[period.ROOM_ID],
-            classes: period.CLASS_IDS.map((c) => masterdata.Class[c].NAME),
+            classes: period.CLASS_IDS.map((c) => masterdata.Class[`${c}`].NAME),
         }));
         return period;
     }
@@ -133,10 +189,11 @@ export default class Timetable extends Component {
                     skip={period.skip}
                     backgroundColor={PERIOD_BGCOLOR}
                     boundingBox={cellPositions[day][y]}
-                    renderContent={(horizontal) => <Period
-                        type={this.props.type}
-                        data={period.lessons}
-                        horizontal={horizontal} />} />
+                    renderContent={(horizontal) =>
+                        <Period
+                            type={this.props.type}
+                            data={period.lessons}
+                            horizontal={horizontal} />} />
             );
         }
         return periodComponents;
@@ -150,13 +207,13 @@ export default class Timetable extends Component {
             if (day.holiday) {
                 components.push(
                     <GridAlignedBox
-                        key={x}
+                        key={"holiday" + x}
                         skip={PERIOD_NUMBERS.length - 1}
                         backgroundColor={HOLIDAY_BGCOLOR}
                         boundingBox={cellPositions[x][0]}
-                        contentContainerStyle={{flexDirection: 'column', justifyContent: 'center'}}
+                        contentContainerStyle={{ flexDirection: 'column', justifyContent: 'center' }}
                         renderContent={(horizontal) => (
-                                <Text style={styles.holiday}>{day.holiday}</Text>
+                            <Text style={styles.holiday}>{day.holiday}</Text>
                         )} />);
             }
             if (day.periods) {
@@ -169,8 +226,7 @@ export default class Timetable extends Component {
     render() {
 
         return (
-            <View style={styles.container}>
-                <AppBar />
+            <View style={[styles.container, this.props.style]}>
                 <View style={styles.container}
                     onLayout={() => {
                         this.onCellLayout(this.refs.grid.cellPositions);
@@ -180,16 +236,16 @@ export default class Timetable extends Component {
                         ref="grid"
                         monday={moment().isoWeekday(1)}
                     >
-                    <View style={{ position: 'absolute', width: '100%', height: '100%' }}>
                         {this.state.cellPositions ?
-                            this.renderWeek(this.state.data)
-                            :
-                            <ActivityIndicator size={80} />
+                            <Swiper
+                                renderPage={() => this.renderWeek(this.state.data)}>
+
+                            </Swiper>
+                            : null
                         }
-                    </View>
                     </Grid>
 
-                    
+
 
                 </View>
             </View>

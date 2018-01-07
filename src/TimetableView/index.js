@@ -1,9 +1,12 @@
 import React, { Component } from 'react';
-import { ActivityIndicator, View, Text } from 'react-native';
+import { Animated, ActivityIndicator, View, Text, TouchableNativeFeedback, Platform, Button } from 'react-native';
 import styles from './styles';
 import { connect } from 'react-redux';
 import { getMasterdata, getTimetable, getSubstitutions } from './api';
 import Timetable from '../Timetable';
+import AppBar from './AppBar';
+import moment from 'moment';
+
 
 class TimetableView extends Component {
 
@@ -13,14 +16,19 @@ class TimetableView extends Component {
             error: null,
             myTimetable: null,
             loading: "",
+            date: moment().isoWeekday(1),
         };
 
     }
 
-    async componentDidMount() {
+    componentDidMount(){
+        this.loadData();
+    }
+
+    loadData = async () => {
         try {
+            this.setState({ loading: "Anzeigedaten", error: null, myTimetable: null });
             let version = (await getMasterdata(this.props.token, 'version')).version;
-            this.setState({ loading: "Anzeigedaten" });
             if (this.props.masterdataVersion !== version) {
                 let masterdata = await getMasterdata(this.props.token, 'all');
                 console.log("reloaded masterdata");
@@ -30,39 +38,58 @@ class TimetableView extends Component {
             this.setState({ loading: "Stundenplandaten" });
             let timetable = await getTimetable(this.props.token, this.props.id.type, this.props.id.id);
 
-            let substitutions = await getSubstitutions(this.props.token, this.props.id.type, this.props.id.id, '2018', '1');
+            let substitutions = await getSubstitutions(this.props.token, this.props.id.type, this.props.id.id, '2018', '2');
             this.setState({ loading: null, myTimetable: timetable, substitutions });
 
-
         } catch (error) {
-            console.log("error while loading TimetableView", error);
             if (error.status === 'token_error') {
                 this.props.resetToken();
+            } else {
+                this.setState({loading: "", error: error.message});
             }
-        }    
+            console.error(error);
+        }
+    }
+
+    async loadSubstitutions(week){
+        console.log(this.state.date);
+        this.state.date.add(week, 'week');
+        let substitutions = await getSubstitutions(this.props.token, this.props.id.type, this.props.id.id, this.state.date.year(), this.state.date.isoWeek());
+        this.setState({ loading: null, substitutions });
+
     }
 
     render() {
         return (
-            <View style={styles.container}>
-                {this.state.error ? <Text style={styles.error}>{this.state.error}</Text> : null}
-
-                {this.state.loading !== null ?
-                    <View style={styles.loadingBox}>
-                        <ActivityIndicator
-                            size={80}
-                        />
-                        <Text>{this.state.loading}</Text>
-                    </View>
-                    : 
-                    <Timetable
-                        data={this.state.myTimetable}
-                        substitutions={this.state.substitutions}
-                        masterdata={this.props.masterdata}
-                        type={this.props.id.type}
-                    >
-                    </Timetable>
+            <View style={styles.flex}>
+                <AppBar
+                 onNext={() => this.loadSubstitutions(1)}
+                 onPrevious={() => this.loadSubstitutions(-1)}/>
+                <View style={styles.container}>
+                {this.state.error ? 
+                    <View style={styles.errorContainer}>
+                        <Text style={styles.error}>{this.state.error}</Text>
+                        <Button  title="Retry" onPress={() => this.loadData()}/>
+                    </View> :
+                    this.state.loading !== null ?
+                        <View style={styles.loadingBox}>
+                            <ActivityIndicator
+                                size={80}
+                            />
+                            <Text>{this.state.loading}</Text>
+                        </View>
+                        :
+                        <Timetable
+                            
+                            data={this.state.myTimetable}
+                            substitutions={this.state.substitutions}
+                            masterdata={this.props.masterdata}
+                            type={this.props.id.type}
+                            onError={(error) => this.setState({error: error.message})}
+                        >
+                        </Timetable>
                 }
+                </View>
             </View>
         );
     }
@@ -78,6 +105,6 @@ export default connect((state) => {
 }, (dispatch) => {
     return {
         setMasterdata: (masterdata) => dispatch({ type: 'SET_MASTERDATA', payload: masterdata }),
-        resetToken: () => dispatch({type: 'SET_TOKEN', payload: null})
+        resetToken: () => dispatch({ type: 'SET_TOKEN', payload: null })
     }
 })(TimetableView);
