@@ -1,10 +1,14 @@
 import React, { Component } from 'react';
 import styles from './styles';
 import PropTypes from 'prop-types';
+<<<<<<< HEAD
 import { View, Text, ActivityIndicator, Dimensions } from 'react-native';
+=======
+import { View, Text, ActivityIndicator, Animated } from 'react-native';
+>>>>>>> e972c6b... animated boxes
 import moment from 'moment';
 import Grid from './Grid';
-import GridAlignedBox from './GridAlignedBox';
+import GridAlignedBox from './GridAlignedBox.animated';
 import Period from './Period';
 import { PERIOD_NUMBERS, WEEKDAY_NAMES, PERIOD_BGCOLOR, HOLIDAY_BGCOLOR } from '../../const';
 import Swiper from './Swiper';
@@ -183,11 +187,14 @@ export default class Timetable extends Component {
                     skip={period.skip}
                     backgroundColor={PERIOD_BGCOLOR}
                     boundingBox={cellPositions[day][y]}
-                    renderContent={(horizontal) =>
+                    renderContent={(horizontal, toggledAnimation) =>
                         <Period
                             type={this.props.type}
                             data={period.lessons}
-                            horizontal={horizontal} />} />
+                            horizontal={horizontal}
+                        />
+                    }
+                />
             );
         }
         return periodComponents;
@@ -213,7 +220,7 @@ export default class Timetable extends Component {
     renderWeek = (timetable) => {
         let components = [];
         const cellPositions = this.state.cellPositions;
-        for (x = 0; x < WEEKDAY_NAMES.length; x++) {
+        for (let x = 0; x < WEEKDAY_NAMES.length; x++) {
             let day = this.state.data[x];
             if (day.holiday) {
                 components.push(

@@ -57,7 +57,7 @@ export default class Grid extends Component {
     }
 
     renderTimeCell(i) {
-        let periodTimes = getPeriodTimes(i-1, this.props.secondary);
+        let periodTimes = getPeriodTimes(i - 1, this.props.secondary);
         return (
             <View key={i} style={[styles.headerCell, i % 2 == 0 ? styles.accent : null]}>
                 <Text style={styles.period}>{i}</Text>
@@ -75,7 +75,7 @@ export default class Grid extends Component {
 
     render() {
         return (
-            <View style={{ flex: 1 }}>
+            <View style={styles.container}>
                 {this.renderHeaderRow()}
                 <View style={styles.grid} onLayout={this.props.onLayout}>
                     {this.renderHeaderColumn(0)}
