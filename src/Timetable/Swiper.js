@@ -125,7 +125,7 @@ export default class Swiper extends Component {
                 style={{ position: 'absolute', width: '100%', height: '100%' }}
                 {...this.panResponder.panHandlers}
             >
-                <Page x={this.state.x}>
+                <Page x={this.state.x} key={0}>
                     {pages[1]}
                 </Page>
             </View>

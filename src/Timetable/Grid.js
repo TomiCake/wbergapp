@@ -74,9 +74,9 @@ export default class Grid extends Component {
 
     render() {
         return (
-            <View style={{ flex: 1 }}>
+            <View style={styles.container}>
                 {this.renderHeaderRow()}
-                <View style={{ flex: 1 }}>
+                <View style={styles.container}>
                     <View style={styles.grid}>
                         {this.renderHeaderColumn(0)}
                         {[1, 2, 3, 4, 5].map((i) => this.renderColumn(i))}

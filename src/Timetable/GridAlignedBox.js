@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 
 import { UIManager, View, Text, ScrollView, Animated, TouchableWithoutFeedback, TouchableOpacity, TouchableNativeFeedback, TouchableHighlight, Dimensions, LayoutAnimation } from 'react-native';
 import styles from './gridAlignedBox.styles';
+
 UIManager.setLayoutAnimationEnabledExperimental &&
     UIManager.setLayoutAnimationEnabledExperimental(true);
 
