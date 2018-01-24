@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import styles from './styles';
 import PropTypes from 'prop-types';
-import { View, Text, ActivityIndicator } from 'react-native';
+import { View, Text, ActivityIndicator, Dimensions } from 'react-native';
 import moment from 'moment';
 import Grid from './Grid';
 import GridAlignedBox from './GridAlignedBox';
@@ -20,11 +20,8 @@ export default class Timetable extends Component {
         this.state = {
 
         };
-
-
         this.state.data = this.parse();
     }
-
     componentWillUpdate() {
         this.state.data = this.parse();
     }
@@ -65,14 +62,14 @@ export default class Timetable extends Component {
 
             subOnDay.substitutions.forEach((substitution) => {
                 let period = day.periods[substitution.PERIOD - 1];
-                if(!period) return;
+                if (!period) return;
                 let lessons = period.lessons;
                 if (lessons) {
                     for (i = 0; i < lessons.length; i++) {
                         let lesson = lessons[i];
                         if (lesson.TIMETABLE_ID === substitution.TIMETABLE_ID) {
                             lessons[i] = {
-                                substitutionType: 'SUBSTITUTION',
+                                substitutionType: substitution.TYPE,
                                 CLASS_IDS: [],
                                 TEACHER_ID: substitution.TEACHER_ID_NEW || lesson.TEACHER_ID,
                                 SUBJECT_ID: substitution.SUBJECT_ID_NEW || lesson.SUBJECT_ID,
@@ -87,7 +84,7 @@ export default class Timetable extends Component {
                         period.lessons = lessons = [];
                     }
                     lessons.push({
-                        substitutionType: 'SUBSTITUTION',
+                        substitutionType: substitution.TYPE,
                         CLASS_IDS: [],
                         TEACHER_ID: substitution.TEACHER_ID_NEW,
                         SUBJECT_ID: substitution.SUBJECT_ID_NEW,
@@ -103,12 +100,13 @@ export default class Timetable extends Component {
 
     skipDuplications(day) {
         if (day.holiday) {
-            return day;
+            return;
         }
         for (y = 0; y < PERIOD_NUMBERS.length; y++) {
             let current = day.periods[y];
             current.skip = 0;
-            while (y + 1 < PERIOD_NUMBERS.length && this.comparePeriod(current.lessons, day.periods[y + 1].lessons)) {
+            while (y + 1 < PERIOD_NUMBERS.length
+                && this.comparePeriod(current.lessons, day.periods[y + 1].lessons)) {
                 y++;
                 delete day.periods[y];
                 current.skip++;
@@ -131,7 +129,6 @@ export default class Timetable extends Component {
     translate(period) {
         if (!period) return period;
         const masterdata = this.props.masterdata;
-        console.log(period);
         period.lessons = period.lessons.map((period) => ({
             substitutionType: period.substitutionType,
             teacher: masterdata.Teacher[period.TEACHER_ID],
@@ -196,6 +193,23 @@ export default class Timetable extends Component {
         return periodComponents;
     }
 
+    calculateCellPositions(layout) {
+        layout.x = 40; //width of periods container
+        const screenWidth = layout.width - layout.x;
+        const screenHeight = layout.height;
+
+        let height = screenHeight / PERIOD_NUMBERS.length;
+        let width = screenWidth / WEEKDAY_NAMES.length;
+        this.state.cellPositions = [[], [], [], [], []];
+
+        for (x = 0; x < WEEKDAY_NAMES.length; x++) {
+            for (y = 0; y < PERIOD_NUMBERS.length; y++) {
+                this.state.cellPositions[x][y] = { width, height, left: width * x + layout.x, top: height * y + layout.y };
+            }
+        }
+        this.forceUpdate();
+    }
+
     renderWeek = (timetable) => {
         let components = [];
         const cellPositions = this.state.cellPositions;
@@ -224,26 +238,19 @@ export default class Timetable extends Component {
 
         return (
             <View style={[styles.container, this.props.style]}>
-                <View style={styles.container}
-                    onLayout={() => {
-                        this.onCellLayout(this.refs.grid.cellPositions);
-                    }}
-                >
+                <View style={styles.container}>
                     <Grid
                         ref="grid"
                         monday={moment().isoWeekday(1)}
+                        onLayout={(layout) => this.calculateCellPositions(layout.nativeEvent.layout)}
                     >
-                        {this.state.cellPositions ?
-                            <Swiper
-                                renderPage={() => this.renderWeek(this.state.data)}>
-
-                            </Swiper>
-                            : null
-                        }
                     </Grid>
-
-
-
+                    {
+                        this.state.cellPositions &&
+                        <Swiper
+                            renderPage={() => this.renderWeek(this.state.data)}>
+                        </Swiper>
+                    }
                 </View>
             </View>
         );

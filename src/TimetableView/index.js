@@ -53,6 +53,8 @@ class TimetableView extends Component {
 
     async loadSubstitutions(week){
         console.log(this.state.date);
+        this.setState({ loading: "neuladen"});
+
         this.state.date.add(week, 'week');
         let substitutions = await getSubstitutions(this.props.token, this.props.id.type, this.props.id.id, this.state.date.year(), this.state.date.isoWeek());
         this.setState({ loading: null, substitutions });
