@@ -75,7 +75,7 @@ export default class Grid extends Component {
 
     render() {
         return (
-            <View style={{ flex: 1 }}>
+            <View style={styles.container}>
                 {this.renderHeaderRow()}
                 <View style={styles.grid} onLayout={this.props.onLayout}>
                     {this.renderHeaderColumn(0)}
