@@ -1,70 +1,86 @@
 import React, { Component } from 'react';
 
 import { View, Text, ScrollView, Animated, TouchableWithoutFeedback, TouchableOpacity, TouchableNativeFeedback, TouchableHighlight, Dimensions } from 'react-native';
-import styles from './period.styles';
-
-export default class Period extends Component {
+import styles, { templates } from './period.styles';
 
 
-    renderLesson(type, lesson, i, horizontal, small) {
-        if (type == "student") {
-            var field1 = { ...lesson.subject };
-            var field2 = { ...lesson.teacher };
-            var field3 = { ...lesson.room };
+function PeriodText(props) {
+    let textStyles = [styles.text, props.style];
+    let textProps = { ellipsizeMode: props.ellipsizeMode };
+    if (props.nowrap) {
+        textProps.numberOfLines = 1;
+    }
+    Object.keys(props).forEach((e) => {
+        switch (e) {
+            case "bold":
+            case "middle":
+            case "small":
+            case "right": textStyles.push(styles[e]);
         }
-        if (lesson.substitutionType == "SUBSTITUTION") {
-            field3.style = { color: 'green' };
-        }
+    });
+
+    return (
+        <Text style={textStyles} {...textProps} >{props.children}</Text>
+    );
+}
 
 
-        if (!horizontal && small) {
-            return (
-                <View key={i} style={styles.row}>
-                    <Text style={[styles.text, styles.bold, field1.style]} numberOfLines={1}>{field1.NAME}</Text>
-                    <View>
-                        <Text style={[styles.text, styles.small, styles.right, field2.style]}>{field2.NAME}</Text>
-                        <Text style={[styles.text, styles.small, styles.right, field3.style]}>{field3.NAME}</Text>
-                    </View>
-                </View>)
+function renderLesson(type, lesson, i, horizontal, small) {
+    Object.keys(lesson).forEach((key) => {
+        if (typeof lesson[key] === 'object') {
+            lesson[key] = { ...lesson[key] }
         }
-        if (!horizontal && !small) {
-            return (
-                <View key={i} style={styles.column}>
-                    <View style={[styles.row, styles.flex]}>
-                        <Text style={[styles.text, styles.bold, field1.style]} numberOfLines={1} >{field1.NAME}</Text>
-                        <Text style={[styles.text, styles.right, field3.style]}>{field3.NAME}</Text>
-                    </View>
-                    <Text style={[styles.text, styles.middle, field2.style]} numberOfLines={1}>{field2.DESCRIPTION}</Text>
-                </View>)
-        }
-        if (horizontal) {
-            return (
-                <View key={i} style={styles.row}>
-                    <View style={[styles.column, styles.flex]}>
-                        <Text style={[styles.text, styles.bold, field1.style]} numberOfLines={1} ellipsizeMode="middle">{field1.DESCRIPTION}</Text>
-                        <Text style={[styles.text, styles.small, field2.style]}>{field2.DESCRIPTION}</Text>
-                    </View>
-                    <View>
-                        <Text style={[styles.text, styles.right, field3.style]}>{field3.NAME}</Text>
-                    </View>
-                </View>
-            )
-        }
+    });
+    let fields = templates[type].map((key) => lesson[key]);
+    switch (lesson.substitutionType) {
+        case "SUBSTITUTION": fields.forEach((e) => e.style = { color: 'red' }); break;
+        case "ASSIGNMENT": fields.forEach((e) => e.style = { color: 'yellow' }); break;
+        case "ROOM_SUBSTITUTION": lesson.room.style = { color: 'green' }; break;
+        case "EXTRA_LESSON": fields.forEach((e) => e.style = { color: 'red' }); break;
     }
 
-    constructor(props) {
-        super(props);
 
-    }
 
-    render() {
-
+    if (!horizontal && small) {
         return (
-            <View style={{flex: 1}}>
-                {this.props.data.map((lesson, i) => (
-                    this.renderLesson(this.props.type, lesson, i, this.props.horizontal, this.props.data.length > 1)
-                ))}
+            <View key={i} style={styles.row}>
+                <PeriodText style={fields[0].style} bold nowrap>{fields[0].NAME}</PeriodText>
+                <View>
+                    <PeriodText style={fields[1].style} small right>{fields[1].NAME}</PeriodText>
+                    <PeriodText style={fields[2].style} small right>{fields[2].NAME}</PeriodText>
+                </View>
+            </View>
+        );
+    }
+    if (!horizontal && !small) {
+        return (
+            <View key={i} style={styles.column}>
+                <View style={[styles.row, styles.flex]}>
+                    <PeriodText style={fields[0].style} bold nowrap >{fields[0].NAME}</PeriodText>
+                    <PeriodText style={fields[2].style} right>{fields[2].NAME}</PeriodText>
+                </View>
+                <PeriodText style={fields[1].style} nowrap middle>{fields[1].DESCRIPTION}</PeriodText>
+            </View>
+        );
+    }
+    if (horizontal) {
+        return (
+            <View key={i} style={styles.row}>
+                <View style={[styles.column, styles.flex]}>
+                    <PeriodText style={fields[0].style} nowrap bold ellipsizeMode="middle">{fields[0].DESCRIPTION}</PeriodText>
+                    <PeriodText style={fields[1].style} small>{fields[1].DESCRIPTION}</PeriodText>
+                </View>
+                <View>
+                    <PeriodText style={fields[2].style} right>{fields[2].NAME}</PeriodText>
+                </View>
             </View>
         );
     }
 }
+export default (props) => (
+    <View style={{ flex: 1 }}>
+        {props.data.map((lesson, i) => (
+            renderLesson(props.type, lesson, i, props.horizontal, props.data.length > 1)
+        ))}
+    </View>
+)

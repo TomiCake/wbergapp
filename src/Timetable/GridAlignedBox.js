@@ -19,6 +19,7 @@ export default class GridAlignedBox extends Component {
     }
 
     render() {
+        if (!this.props.boundingBox) return null;
         const margin = this.state.toggled ? -10 : 2;
         const height = this.props.boundingBox.height * (this.props.skip + 1)
             + this.props.skip - 2 * margin;
@@ -40,8 +41,14 @@ export default class GridAlignedBox extends Component {
         }
 
         const dimenions = Dimensions.get('window');
-        computedStyle.left = Math.min(dimenions.width - computedStyle.width, Math.max(computedStyle.left, 10));
-        computedStyle.top = Math.min(dimenions.height - 50, Math.max(computedStyle.top, 0));
+        computedStyle.left = Math.min(
+            dimenions.width - computedStyle.width,
+            Math.max(computedStyle.left, 10)
+        );
+        computedStyle.top = Math.min(
+            dimenions.height - 50,
+            Math.max(computedStyle.top, 0)
+        );
 
         const horizontal = computedStyle.width > this.props.boundingBox.height * 1.5;
 
