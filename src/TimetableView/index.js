@@ -22,19 +22,26 @@ class TimetableView extends Component {
     }
 
     static navigationOptions = ({ navigation }) =>({
-        header: () => {
-            return  <AppBar navigation = {navigation} isLoading = {navigation.state.params && navigation.state.params.isLoading} /> }
-        
+        header: <AppBar 
+            navigation = {navigation} 
+            onSelect = {navigation.state.params && navigation.state.params.onSelect || (() => {})} 
+            isLoading = {navigation.state.params && navigation.state.params.isLoading}
+        />
     });
 
     componentDidMount(){
         this.loadData();
+        this.props.navigation.setParams({onSelect: this.onSelect});
     }
 
     componentWillUpdate(nextProps, nextState) {
         if(nextState.loading !== this.state.loading) {
             this.props.navigation.setParams({isLoading: !!nextState.loading});
         }
+    }
+
+    onSelect(type, id) {
+        console.log(type,id);
     }
 
     loadData = async () => {

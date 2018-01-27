@@ -9,7 +9,7 @@ import { Bar } from 'react-native-progress';
 export default class AppBar extends Component {
 
     open(path) {
-        this.props.navigation.navigate(path);
+        this.props.navigation.navigate(path, {onSelect: this.props.onSelect});
     }
 
     render() {
