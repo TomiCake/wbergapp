@@ -16,18 +16,25 @@ class TimetableView extends Component {
         this.state = {
             error: null,
             myTimetable: null,
-            loading: "",
             date: moment().isoWeekday(1),
         };
 
     }
 
     static navigationOptions = ({ navigation }) =>({
-        header: <AppBar navigation = {navigation} />,
+        header: () => {
+            return  <AppBar navigation = {navigation} isLoading = {navigation.state.params && navigation.state.params.isLoading} /> }
+        
     });
 
     componentDidMount(){
         this.loadData();
+    }
+
+    componentWillUpdate(nextProps, nextState) {
+        if(nextState.loading !== this.state.loading) {
+            this.props.navigation.setParams({isLoading: !!nextState.loading});
+        }
     }
 
     loadData = async () => {
