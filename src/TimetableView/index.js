@@ -66,30 +66,23 @@ class TimetableView extends Component {
             <View style={styles.flex}>
                 <AppBar
                  onNext={() => this.loadSubstitutions(1)}
-                 onPrevious={() => this.loadSubstitutions(-1)}/>
+                 onPrevious={() => this.loadSubstitutions(-1)}
+                 isLoading={this.state.loading !== null}/>
                 <View style={styles.container}>
                 {this.state.error ? 
                     <View style={styles.errorContainer}>
                         <Text style={styles.error}>{this.state.error}</Text>
                         <Button  title="Retry" onPress={() => this.loadData()}/>
                     </View> :
-                    this.state.loading !== null ?
-                        <View style={styles.loadingBox}>
-                            <ActivityIndicator
-                                size={80}
-                            />
-                            <Text>{this.state.loading}</Text>
-                        </View>
-                        :
-                        <Timetable
-                            
-                            data={this.state.myTimetable}
-                            substitutions={this.state.substitutions}
-                            masterdata={this.props.masterdata}
-                            type={this.props.id.type}
-                            onError={(error) => this.setState({error: error.message})}
-                        >
-                        </Timetable>
+                    <Timetable
+                        
+                        data={this.state.myTimetable}
+                        substitutions={this.state.substitutions}
+                        masterdata={this.props.masterdata}
+                        type={this.props.id.type}
+                        onError={(error) => this.setState({error: error.message})}
+                    >
+                    </Timetable>
                 }
                 </View>
             </View>

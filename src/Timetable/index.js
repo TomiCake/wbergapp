@@ -1,11 +1,7 @@
 import React, { Component } from 'react';
 import styles from './styles';
 import PropTypes from 'prop-types';
-<<<<<<< HEAD
-import { View, Text, ActivityIndicator, Dimensions } from 'react-native';
-=======
 import { View, Text, ActivityIndicator, Animated } from 'react-native';
->>>>>>> e972c6b... animated boxes
 import moment from 'moment';
 import Grid from './Grid';
 import GridAlignedBox from './GridAlignedBox.animated';
