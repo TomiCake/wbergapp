@@ -42,6 +42,10 @@ class SearchView extends Component {
         }
     }
 
+    static navigationOptions = ({ navigation }) =>({
+        header: SearchView.renderHeader(),
+    });
+
     getDataSource = (text = "") => {
         const ds = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
 
@@ -52,26 +56,30 @@ class SearchView extends Component {
         this.setState({ dataSource: this.getDataSource(text) });
     }
 
+    static renderHeader() {
+       return (
+       <View style={styles.textInput}>
+            <TextInput
+                style={{ flex: 1 }}
+                ref="textInput"
+                keyboardType="number-pad"
+                placeholder="Suchen"
+                enablesReturnKeyAutomatically
+                underlineColorAndroid="white"
+                blurOnSubmit
+                onChangeText={this.onChangeText}
+            />
+            <TouchableNativeFeedback
+                background={Platform.select({ android: TouchableNativeFeedback.Ripple() })}
+                onPress={() => this.refs.textInput.clear()}>
+                <Icon name="close" size={28} color="gray" />
+            </TouchableNativeFeedback>
+        </View>
+        )
+    }
     render() {
         return (
             <View>
-                <View style={styles.textInput}>
-                    <TextInput
-                        style={{ flex: 1 }}
-                        ref="textInput"
-                        keyboardType="number-pad"
-                        placeholder="Suchen"
-                        enablesReturnKeyAutomatically
-                        underlineColorAndroid="white"
-                        blurOnSubmit
-                        onChangeText={this.onChangeText}
-                    />
-                    <TouchableNativeFeedback
-                        background={Platform.select({ android: TouchableNativeFeedback.Ripple() })}
-                        onPress={() => this.refs.textInput.clear()}>
-                        <Icon name="close" size={28} color="gray" />
-                    </TouchableNativeFeedback>
-                </View>
                 <ListView
                     dataSource={this.state.dataSource}
                     renderRow={row}>

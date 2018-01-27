@@ -6,7 +6,8 @@ import { getMasterdata, getTimetable, getSubstitutions } from './api';
 import Timetable from '../Timetable';
 import AppBar from './AppBar';
 import moment from 'moment';
-
+import { StackNavigator } from 'react-navigation';
+import SearchView from '../SearchView';
 
 class TimetableView extends Component {
 
@@ -20,6 +21,10 @@ class TimetableView extends Component {
         };
 
     }
+
+    static navigationOptions = ({ navigation }) =>({
+        header: <AppBar navigation = {navigation} />,
+    });
 
     componentDidMount(){
         this.loadData();
@@ -47,7 +52,7 @@ class TimetableView extends Component {
             } else {
                 this.setState({loading: "", error: error.message});
             }
-            console.error(error);
+            console.log(error);
         }
     }
 
@@ -64,32 +69,21 @@ class TimetableView extends Component {
     render() {
         return (
             <View style={styles.flex}>
-                <AppBar
-                 onNext={() => this.loadSubstitutions(1)}
-                 onPrevious={() => this.loadSubstitutions(-1)}/>
+
                 <View style={styles.container}>
                 {this.state.error ? 
                     <View style={styles.errorContainer}>
                         <Text style={styles.error}>{this.state.error}</Text>
                         <Button  title="Retry" onPress={() => this.loadData()}/>
                     </View> :
-                    this.state.loading !== null ?
-                        <View style={styles.loadingBox}>
-                            <ActivityIndicator
-                                size={80}
-                            />
-                            <Text>{this.state.loading}</Text>
-                        </View>
-                        :
-                        <Timetable
-                            
-                            data={this.state.myTimetable}
-                            substitutions={this.state.substitutions}
-                            masterdata={this.props.masterdata}
-                            type={this.props.id.type}
-                            onError={(error) => this.setState({error: error.message})}
-                        >
-                        </Timetable>
+                    <Timetable
+                        data={this.state.myTimetable}
+                        substitutions={this.state.substitutions}
+                        masterdata={this.props.masterdata}
+                        type={this.props.id.type}
+                        onError={(error) => this.setState({error: error.message})}
+                    >
+                    </Timetable>
                 }
                 </View>
             </View>

@@ -17,8 +17,7 @@ import devToolsEnhancer from 'remote-redux-devtools';
 import authReducer from './src/Login/reducer';
 import timetableReducer from './src/TimetableView/reducer';
 import LoginBearer from './src/Login/LoginBearer';
-import TimetableView from './src/TimetableView';
-import SearchView from './src/SearchView';
+import TimetableContainer from './src/TimetableContainer';
 import {
     setCustomText,
 } from 'react-native-global-props';
@@ -45,7 +44,6 @@ const reducer = persistCombineReducers(config, {
 const store = createStore(reducer, window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__());
 const persistor = persistStore(store);
 
-
 export default class App extends Component {
     render() {
         return (
@@ -55,7 +53,7 @@ export default class App extends Component {
                     persistor={persistor}>
 
                     <LoginBearer>
-                        <TimetableView />
+                        <TimetableContainer />
                     </LoginBearer>
 
                 </PersistGate>

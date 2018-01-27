@@ -53,7 +53,7 @@ export default class GridAlignedBox extends Component {
 
     toggle = (e) => {
         this.animate(this.toggled = !this.toggled);
-        this.setState({toggledBoolean: this.toggled});
+        this.setState({ toggledBoolean: this.toggled });
     }
 
     componentWillUpdate(nextProps, nextState) {
