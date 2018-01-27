@@ -8,11 +8,15 @@ import { Bar } from 'react-native-progress';
 
 export default class AppBar extends Component {
 
+    open(path) {
+        this.props.navigation.navigate(path);
+    }
+
     render() {
         return (
             <View style={styles.appBar}>
                 <View style={styles.firstRow}>
-                    <StatusBar backgroundColor={"#002171"}/>
+                    <StatusBar backgroundColor={"#1976D2"}/>
                     <Image
                         source={require('wbergapp/img/logowhite.png')}
                         resizeMode="contain"
@@ -24,12 +28,12 @@ export default class AppBar extends Component {
                             iconStyle={styles.button}
                             name = 'date-range'
                             color = "white"
-                            onPress={this.props.onPrevious} />
+                            onPress={() => {this.props.navigation.navigate('calendar')}} />
                         <Icon
                             iconStyle={styles.button}
                             name = 'search'
                             color = "white"
-                            onPress={this.props.onNext} />
+                            onPress={this.open.bind(this, 'Search')} />
                     </View>
                 </View>
                 <Bar 

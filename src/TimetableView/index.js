@@ -6,7 +6,8 @@ import { getMasterdata, getTimetable, getSubstitutions } from './api';
 import Timetable from '../Timetable';
 import AppBar from './AppBar';
 import moment from 'moment';
-
+import { StackNavigator } from 'react-navigation';
+import SearchView from '../SearchView';
 
 class TimetableView extends Component {
 
@@ -20,6 +21,10 @@ class TimetableView extends Component {
         };
 
     }
+
+    static navigationOptions = ({ navigation }) =>({
+        header: <AppBar navigation = {navigation} />,
+    });
 
     componentDidMount(){
         this.loadData();
@@ -64,10 +69,7 @@ class TimetableView extends Component {
     render() {
         return (
             <View style={styles.flex}>
-                <AppBar
-                 onNext={() => this.loadSubstitutions(1)}
-                 onPrevious={() => this.loadSubstitutions(-1)}
-                 isLoading={this.state.loading !== null}/>
+
                 <View style={styles.container}>
                 {this.state.error ? 
                     <View style={styles.errorContainer}>
@@ -75,7 +77,6 @@ class TimetableView extends Component {
                         <Button  title="Retry" onPress={() => this.loadData()}/>
                     </View> :
                     <Timetable
-                        
                         data={this.state.myTimetable}
                         substitutions={this.state.substitutions}
                         masterdata={this.props.masterdata}
