@@ -20,31 +20,31 @@ export default class Timetable extends Component {
         this.state = {
 
         };
-        this.state.data = this.parse();
-    }
-    componentWillUpdate() {
-        this.state.data = this.parse();
+        if(this.props.data) this.state.data = this.parse(this.props);
     }
 
-    parse() {
+    componentWillReceiveProps(nextProps) {
+        if(nextProps.data) this.state.data = this.parse(nextProps);
+    }
+
+    parse(props) {
         let data = [];
         for (x = 0; x < WEEKDAY_NAMES.length; x++) {
-            let day = this.readTimetable(x);
-            this.joinSubstitutions(day, this.props.substitutions[x + 1]);
+            let day = this.readTimetable(props.data, x);
+            if(props.substitutions) {
+                this.joinSubstitutions(day, props.substitutions[x + 1]);
+            }
             this.skipDuplications(day);
-            this.translatePeriods(day);
+            this.translatePeriods(props.masterdata, day);
             data[x] = day;
         }
-
-        console.log(data);
         return data;
-
     }
 
-    readTimetable(day) {
+    readTimetable(_data, day) {
         let data = [];
         for (y = 0; y < PERIOD_NUMBERS.length; y++) {
-            let lessons = this.props.data[day + 1][y + 1];
+            let lessons = _data[day + 1][y + 1];
             if (lessons) {
                 lessons = [...lessons];
             }
@@ -96,8 +96,6 @@ export default class Timetable extends Component {
 
     }
 
-
-
     skipDuplications(day) {
         if (day.holiday) {
             return;
@@ -114,21 +112,19 @@ export default class Timetable extends Component {
         }
     }
 
-    translatePeriods(day) {
+    translatePeriods(masterdata, day) {
         if (day.holiday) {
             return day;
         }
         for (y = 0; y < PERIOD_NUMBERS.length; y++) {
             if (day.periods[y] && day.periods[y].lessons) {
-                this.translate(day.periods[y]);
+                this.translate(masterdata, day.periods[y]);
             }
         }
     }
 
-
-    translate(period) {
+    translate(masterdata, period) {
         if (!period) return period;
-        const masterdata = this.props.masterdata;
         period.lessons = period.lessons.map((period) => ({
             substitutionType: period.substitutionType,
             teacher: masterdata.Teacher[period.TEACHER_ID],
@@ -249,7 +245,7 @@ export default class Timetable extends Component {
                     >
                     </Grid>
                     {
-                        this.state.cellPositions &&
+                        this.state.cellPositions && this.state.data &&
                         <Swiper
                             renderPage={() => this.renderWeek(this.state.data)}>
                         </Swiper>
