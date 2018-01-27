@@ -28,7 +28,7 @@ export default class AppBar extends Component {
                             iconStyle={styles.button}
                             name = 'date-range'
                             color = "white"
-                            onPress={() => {this.props.navigation.navigate('calendar')}} />
+                            onPress={() => this.props.openCalendar()} />
                         <Icon
                             iconStyle={styles.button}
                             name = 'search'

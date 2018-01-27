@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Animated, ActivityIndicator, View, Text, TouchableNativeFeedback, Platform, Button } from 'react-native';
+import { Animated, ActivityIndicator, View, Text } from 'react-native';
 import styles from './styles';
 import { connect } from 'react-redux';
 import { getMasterdata, getTimetable, getSubstitutions } from './api';
@@ -8,6 +8,7 @@ import AppBar from './AppBar';
 import moment from 'moment';
 import { StackNavigator } from 'react-navigation';
 import SearchView from '../SearchView';
+import CalendarModal from './CalendarModal';
 
 class TimetableView extends Component {
 
@@ -16,6 +17,7 @@ class TimetableView extends Component {
         this.state = {
             error: null,
             myTimetable: null,
+            calendarModal: false,
             date: moment().isoWeekday(1),
         };
 
@@ -25,13 +27,17 @@ class TimetableView extends Component {
         header: <AppBar 
             navigation = {navigation} 
             onSelect = {navigation.state.params && navigation.state.params.onSelect || (() => {})} 
+            openCalendar = {navigation.state.params && navigation.state.params.openCalendar || (() => {})}
             isLoading = {navigation.state.params && navigation.state.params.isLoading}
         />
     });
 
     componentDidMount(){
         this.loadData();
-        this.props.navigation.setParams({onSelect: this.onSelect});
+        this.props.navigation.setParams({
+            onSelect: this.onSelect.bind(this), 
+            openCalendar: this.openCalendar.bind(this)
+        });
     }
 
     componentWillUpdate(nextProps, nextState) {
@@ -42,6 +48,15 @@ class TimetableView extends Component {
 
     onSelect(type, id) {
         console.log(type,id);
+    }
+
+    openCalendar() {
+        this.setState({calendarModal: true});
+    }
+
+    closeCalendar(date) {
+        this.setState({calendarModal: false});
+        console.log(date);
     }
 
     loadData = async () => {
@@ -77,7 +92,6 @@ class TimetableView extends Component {
         this.state.date.add(week, 'week');
         let substitutions = await getSubstitutions(this.props.token, this.props.id.type, this.props.id.id, this.state.date.year(), this.state.date.isoWeek());
         this.setState({ loading: null, substitutions });
-
     }
 
     render() {
@@ -100,6 +114,7 @@ class TimetableView extends Component {
                     </Timetable>
                 }
                 </View>
+                <CalendarModal visible={this.state.calendarModal} date={this.state.date} selectDate={this.closeCalendar.bind(this)}/>
             </View>
         );
     }
