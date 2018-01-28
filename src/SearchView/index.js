@@ -48,7 +48,7 @@ class SearchView extends Component {
                         masterdata[type][key].LASTNAME + ", " +  masterdata[type][key].FIRSTNAME,
                     filtername: masterdata[type][key].NAME + " " + masterdata[type][key].LASTNAME + " " +  masterdata[type][key].FIRSTNAME +  " " + masterdata[type][key].LASTNAME,
                     typeName: ["Lehrer", "Klassen", "Räume", "Schüler"][i],
-                    type,
+                    type: type.toLowerCase(),
                     id: key
                 }))
                 ]

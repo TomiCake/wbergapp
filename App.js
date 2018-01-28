@@ -18,9 +18,7 @@ import authReducer from './src/Login/reducer';
 import timetableReducer from './src/TimetableView/reducer';
 import LoginBearer from './src/Login/LoginBearer';
 import TimetableContainer from './src/TimetableContainer';
-import {
-    setCustomText,
-} from 'react-native-global-props';
+import { setCustomText } from 'react-native-global-props';
 
 setCustomText({
     style: {

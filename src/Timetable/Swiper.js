@@ -10,8 +10,7 @@ class Page extends Component {
         super(props);
 
         this.props.page.page.update = this.loadRender.bind(this);
-        this.props.page.page.loadSlaves = this.loadSlaves.bind(this);
-        
+
     }
 
     componentDidMount() {
@@ -20,18 +19,22 @@ class Page extends Component {
         console.log("unmound" + this.props.page.page.index)
     }
 
-    loadSlaves() {
-        this.props.slave.forEach((slave) => slave.update && slave.update());
-    }
-
     loadRender(force) {
-        if (this.promise || !force && this.children) return;
-        return this.promise = this.props.page.page.renderWeek(this.props.page.page.index)
+        if (this.promise || !force && this.children) {
+            if (this.props.slaves) {
+                this.props.slaves.forEach((slave) => slave.update(force));
+            }
+            return;
+        }
+        return this.promise = this.props.renderWeek(this.props.page.page.index)
             .then((rendered) => {
                 this.children = rendered;
                 this.promise = null;
                 this.forceUpdate();
                 console.log("rendered" + this.props.page.page.index);
+                if (this.props.slaves) {
+                    this.props.slaves.forEach((slave) => slave.update(force));
+                }
             });
     }
 
@@ -68,8 +71,7 @@ class Page extends Component {
             );
         }
         if (!this.children && !this.promise) {
-            this.loadRender()
-                .then(() => this.props.slave.forEach((slave) => slave.update()))
+            this.loadRender();
         }
 
         return (
@@ -99,7 +101,7 @@ export default class Swiper extends Component {
 
     constructor(props) {
         super(props);
-        this.renderPages();
+        this.setIndex(this.index);
         this.state = {
             x: props.animatedValue,
         }
@@ -127,7 +129,7 @@ export default class Swiper extends Component {
                     });
                     const s = gestureState.dx;
                     this.anim.start(() => {
-                        
+
                     });
                     setTimeout(() => {
                         this.changePage(s);
@@ -166,6 +168,7 @@ export default class Swiper extends Component {
 
     index = 1;
     pages = [];
+    masterPage;
 
     changePage(dx, callback) {
         if (dx < 0) {
@@ -173,51 +176,42 @@ export default class Swiper extends Component {
         } else {
             this.index--;
         }
+        this.setIndex(this.index);
+        this.forceUpdate(() => this.masterPage.update());
+    }
+
+    setIndex(index) {
         let newPages = [];
-        for (i = this.index - 1; i <= this.index + 1; i++) {
+        for (i = index - 1; i <= index + 1; i++) {
             if (this.pages[i]) {
                 newPages[i] = this.pages[i];
             } else {
-                newPages[i] = { index: i, renderWeek: this.props.renderWeek };
+                newPages[i] = { index: i };
             }
         }
         this.pages = newPages;
-        this.forceUpdate(() => this.pages[this.index].loadSlaves());
-    }
-
-    renderPages() {
-        for (i = this.index - 1; i <= this.index + 1; i++) {
-            this.pages[i] = { index: i, renderWeek: this.props.renderWeek };
-        }
+        this.masterPage = newPages[index];
+        this.masterPage.slaves = newPages.slice().splice(index);
     }
 
     updateCellPositions() {
-        this.pages.forEach((page) => page.update && page.update(true))
+        this.masterPage.update(true);
     }
 
     render() {
-        let page1 = this.pages[this.index - 1];
-        let masterPage = this.pages[this.index];
-        let page3 = this.pages[this.index + 1];
+        let left = this.pages[this.index - 1];
+        let right = this.pages[this.index + 1];
         return (
             <View
                 style={{ position: 'absolute', height: '100%', width: '100%' }}
                 {...this.panResponder.panHandlers}
             >
-
-                <Page x={this.state.x} left key={page1.index} page={{ page: page1 }}
-                >
-                </Page>
-
-
-                <Page x={this.state.x} right key={page3.index} page={{ page: page3 }}>
-                </Page>
-
+                <Page x={this.state.x} left key={left.index} page={{ page: left }} renderWeek={this.props.renderWeek}/>
+                <Page x={this.state.x} right key={right.index} page={{ page: right }} renderWeek={this.props.renderWeek}/>
                 <Page x={this.state.x}
-                    slave={[page1, page3]}
-                    key={masterPage.index}
-                    page={{ page: masterPage }}>
-                </Page>
+                    slaves={[left, right]}
+                    key={this.masterPage.index}
+                    page={{ page: this.masterPage }} renderWeek={this.props.renderWeek}/>
             </View>
         );
     }

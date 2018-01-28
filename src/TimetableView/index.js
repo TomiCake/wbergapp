@@ -24,7 +24,7 @@ class TimetableView extends Component {
         };
 
         this.timetableStore = {
-            
+
         }
 
     }
@@ -52,9 +52,11 @@ class TimetableView extends Component {
         }
     }
 
-    onSelect(type, id) {
+    onSelect(id, type) {
         console.log(type, id);
-        // change this.state.id and type
+        this.setState({ id, type });
+        this.timetableStore = {};
+        // clear timetable cache for new id
     }
 
     openCalendar() {
@@ -89,11 +91,13 @@ class TimetableView extends Component {
 
 
     loadForTimetable = async (week, year) => {
-        
-        let timetable = this.timetableStore.timetable || await (this.timetableStore.timetable = getTimetable(this.props.token, this.state.type, this.state.id));
+
+        let timetable = this.timetableStore.timetable
+            || await getTimetable(this.props.token, this.state.type, this.state.id);
         this.timetableStore.timetable = timetable;
 
-        let substitutions = this.timetableStore[week + "" + year] || await getSubstitutions(this.props.token, this.state.type, this.state.id, year, week);
+        let substitutions = this.timetableStore[week + "" + year]
+            || await getSubstitutions(this.props.token, this.state.type, this.state.id, year, week);
         this.timetableStore[week + "" + year] = substitutions;
 
         return { timetable, substitutions };
@@ -110,10 +114,11 @@ class TimetableView extends Component {
                             <Button title="Retry" onPress={() => this.loadData()} />
                         </View> :
                         <Timetable
-                            date={this.state.date}    
+                            date={this.state.date}
                             loadFor={this.loadForTimetable}
                             masterdata={this.props.masterdata}
                             type={this.state.type}
+                            id={this.state.id}
                             onError={(error) => this.setState({ error: error.message })}
                         >
                         </Timetable>

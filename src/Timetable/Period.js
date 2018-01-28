@@ -31,6 +31,7 @@ function renderLesson(type, lesson, i, horizontal, small) {
             lesson[key] = { ...lesson[key] }
         }
     });
+    if (!templates[type]) console.log(type);
     let fields = templates[type].map((key) => lesson[key]);
     fields = fields.map((elem) => {
         if (!elem) {

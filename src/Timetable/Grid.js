@@ -108,7 +108,7 @@ export default class Grid extends Component {
                     <View style={styles.grid} onLayout={this.props.onLayout}>
                         {[1, 2, 3, 4, 5].map((i) => this.renderColumn(i))}
                         <Swiper
-                            ref="swiper"    
+                            ref="swiper"
                             animatedValue={this.state.animatedValue}
                             renderWeek={this.props.renderWeek}>
 

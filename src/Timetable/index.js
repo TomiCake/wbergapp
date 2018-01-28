@@ -12,7 +12,6 @@ import Swiper from './Swiper';
 export default class Timetable extends Component {
     static propTypes = {
         type: PropTypes.string,
-        data: PropTypes.object,
         masterdata: PropTypes.object,
     }
     constructor(props) {
@@ -26,11 +25,21 @@ export default class Timetable extends Component {
     }
 
     componentWillReceiveProps(nextProps) {
-        
+        console.log("componentWillReceiveProps");
+        if (nextProps.id !== this.props.id || nextProps.type !== this.props.type) {
+            // clear timetable cache
+            this.timetableStore = {};
+            this.refs.grid.updateCellPositions();
+        }
+        if (!nextProps.date.isSame(this.props.date)) {
+            // date changed
+        }
     }
 
     async parse(week, year) {
-        if (this.timetableStore[week + "" + year]) return this.timetableStore[week + "" + year];
+        if (this.timetableStore[week + "" + year]) {
+            return this.timetableStore[week + "" + year];
+        }
         let props = await this.props.loadFor(week, year);
         let data = [];
         for (x = 0; x < WEEKDAY_NAMES.length; x++) {
@@ -131,7 +140,6 @@ export default class Timetable extends Component {
     translate(masterdata, period) {
         if (!period) return period;
         period.lessons = period.lessons.map((period) => ({
-            period,
             substitutionType: period.substitutionType,
             teacher: masterdata.Teacher[period.TEACHER_ID],
             subject: masterdata.Subject[period.SUBJECT_ID],
