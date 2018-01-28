@@ -9,7 +9,7 @@ import { Bar } from 'react-native-progress';
 export default class AppBar extends Component {
 
     open(path) {
-        this.props.navigation.navigate(path);
+        this.props.navigation.navigate(path, {onSelect: this.props.onSelect});
     }
 
     render() {
@@ -28,7 +28,7 @@ export default class AppBar extends Component {
                             iconStyle={styles.button}
                             name = 'date-range'
                             color = "white"
-                            onPress={() => {this.props.navigation.navigate('calendar')}} />
+                            onPress={() => this.props.openCalendar()} />
                         <Icon
                             iconStyle={styles.button}
                             name = 'search'

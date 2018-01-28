@@ -1,91 +1,89 @@
 import React, { Component } from 'react';
 
-import { View, TextInput, TouchableNativeFeedback, Platform, ListView, Text } from 'react-native';
+import { FlatList, View, Text, TouchableNativeFeedback, Keyboard } from 'react-native';
 import { connect } from 'react-redux';
 
 import styles from './styles';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import { Icon } from 'react-native-elements';
+import AppBar from './AppBar';
 
-const row = (user) => (
-    <TouchableNativeFeedback
-        background={Platform.select({ android: TouchableNativeFeedback.SelectableBackground() })}
-    >
-        <View style={styles.row}>
-            <Text>
-                {user.FIRSTNAME ? user.LASTNAME + ", " + user.FIRSTNAME : user.NAME}
-            </Text>
-            <Text>
-                {user.type}
-            </Text>
+class ListItem extends Component {
+    render() { return (
+        <View style={styles.listItem}>
+            <View style={styles.listItemNameType}>
+                <Text style={styles.listItemName}>
+                    {this.props.item.name}
+                </Text>
+                <Text style={styles.listItemType}>
+                    {this.props.item.typeName}
+                </Text>
+            </View>
+            <Icon
+                iconStyle={styles.button}
+                name = 'chevron-right'
+                color = "#333333"
+                reverse
+                size = {15}
+                onPress={() => this.props.select(this.props.item.id, this.props.item.type)} />
         </View>
-    </TouchableNativeFeedback>
-);
+    )}
+};
 
 class SearchView extends Component {
-
     constructor(props) {
         super(props);
-        this.entries = [];
-        const masterdata = this.props.masterdata;
-        ['Teacher', 'Class', 'Room', 'Student'].forEach((type) =>
-            this.entries.push(...Object.keys(masterdata[type])
-                .map((key) => {
-                    let obj = masterdata[type][key];
-                    obj.type = type;
-                    return obj;
-                })
-            )
-        )
-
         this.state = {
-            dataSource: this.getDataSource()
+            data: this.filterData()
         }
     }
 
+    filterData (filter) {
+        const masterdata = this.props.masterdata;
+        const data = 
+            ['Teacher', 'Class', 'Room', 'Student'].reduce((result,type,i) =>
+               [...result,   
+                ...Object.keys(masterdata[type]).map((key) => ({
+                    name: (i == 1 || i==2) ?
+                        masterdata[type][key].NAME: 
+                        masterdata[type][key].LASTNAME + ", " +  masterdata[type][key].FIRSTNAME,
+                    filtername: masterdata[type][key].NAME + " " + masterdata[type][key].LASTNAME + " " +  masterdata[type][key].FIRSTNAME +  " " + masterdata[type][key].LASTNAME,
+                    typeName: ["Lehrer", "Klassen", "Räume", "Schüler"][i],
+                    type,
+                    id: key
+                }))
+                ]
+        , []);
+        return !filter ? data : data.filter((item) => {
+            return new RegExp(`${filter}`, "gi").test(item.filtername)
+        });
+    }
+
+    componentDidMount() {
+        this.props.navigation.setParams({onChangeText: this.onChangeText});
+    }
+
     static navigationOptions = ({ navigation }) =>({
-        header: SearchView.renderHeader(),
+        header: <AppBar goBack = {navigation.goBack} onChangeText = {navigation.state.params && navigation.state.params.onChangeText}/>,
     });
 
-    getDataSource = (text = "") => {
-        const ds = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
-
-        return ds.cloneWithRows(this.entries.filter((elem) => (elem.FIRSTNAME ? elem.FIRSTNAME + " " + elem.LASTNAME : elem.NAME).indexOf(text) !== -1));
-    }
-
     onChangeText = (text) => {
-        this.setState({ dataSource: this.getDataSource(text) });
+        this.setState({ data: this.filterData(text) });
     }
 
-    static renderHeader() {
-       return (
-       <View style={styles.textInput}>
-            <TextInput
-                style={{ flex: 1 }}
-                ref="textInput"
-                keyboardType="number-pad"
-                placeholder="Suchen"
-                enablesReturnKeyAutomatically
-                underlineColorAndroid="white"
-                blurOnSubmit
-                onChangeText={this.onChangeText}
-            />
-            <TouchableNativeFeedback
-                background={Platform.select({ android: TouchableNativeFeedback.Ripple() })}
-                onPress={() => this.refs.textInput.clear()}>
-                <Icon name="close" size={28} color="gray" />
-            </TouchableNativeFeedback>
-        </View>
-        )
+    select (id, type) {
+        this.props.navigation.goBack();
+        this.props.navigation.state.params.onSelect(id, type);
+        Keyboard.dismiss();
     }
+
     render() {
         return (
-            <View>
-                <ListView
-                    dataSource={this.state.dataSource}
-                    renderRow={row}>
-
-                </ListView>
-            </View>
+            <FlatList
+                keyboardShouldPersistTaps={'handled'}
+                renderItem={({item}) => <ListItem item={item} select={(id, type) => {this.select(id, type)}}/>}
+                keyExtractor = {(item, index) => `${item.type}-${item.id}`}
+                data={this.state.data}
+                />
         );
     }
 }
