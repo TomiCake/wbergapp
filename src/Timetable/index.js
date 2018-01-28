@@ -20,24 +20,26 @@ export default class Timetable extends Component {
         this.state = {
 
         };
-        if(this.props.data) this.state.data = this.parse(this.props);
+        if (this.props.data) this.state.data = this.parse(this.props);
     }
 
     componentWillReceiveProps(nextProps) {
-        if(nextProps.data) this.state.data = this.parse(nextProps);
+        if (nextProps.data) this.state.data = this.parse(nextProps);
     }
 
     parse(props) {
         let data = [];
         for (x = 0; x < WEEKDAY_NAMES.length; x++) {
             let day = this.readTimetable(props.data, x);
-            if(props.substitutions) {
+            if (props.substitutions) {
                 this.joinSubstitutions(day, props.substitutions[x + 1]);
             }
             this.skipDuplications(day);
             this.translatePeriods(props.masterdata, day);
             data[x] = day;
         }
+        this.onDataReceiveds.forEach((fn) => fn(data));  
+        this.onDataReceiveds = [];
         return data;
     }
 
@@ -135,11 +137,6 @@ export default class Timetable extends Component {
         return period;
     }
 
-    onCellLayout = (cellPositions) => {
-        this.setState({ cellPositions });
-
-    }
-
     comparePeriod(current, next) {
         if (!next || !current) return false;
         if (current.length != next.length) return false;
@@ -193,8 +190,7 @@ export default class Timetable extends Component {
     }
 
     calculateCellPositions(layout) {
-        layout.x = 40; //width of periods container
-        const screenWidth = layout.width - layout.x;
+        const screenWidth = layout.width;
         const screenHeight = layout.height;
 
         let height = screenHeight / PERIOD_NUMBERS.length;
@@ -203,17 +199,36 @@ export default class Timetable extends Component {
 
         for (x = 0; x < WEEKDAY_NAMES.length; x++) {
             for (y = 0; y < PERIOD_NUMBERS.length; y++) {
-                this.state.cellPositions[x][y] = { width, height, left: width * x + layout.x, top: height * y + layout.y };
+                this.state.cellPositions[x][y] = { width, height, left: width * x, top: height * y };
             }
         }
-        this.forceUpdate();
+        this.onCellLayouts.forEach((fn) => fn(this.state.cellPositions));
+        this.onCellLayouts = [];
+        this.refs.grid.updateCellPositions();
     }
+    onDataReceiveds = [];
+    onCellLayouts = [];
 
-    renderWeek = (timetable) => {
+
+    renderWeek = async (i) => {
+        let cellPositions = await new Promise((resolve) => {
+            if (this.state.cellPositions) {
+                resolve(this.state.cellPositions);
+            } else {
+                this.onCellLayouts.push(resolve);
+            }
+        });
+        let timetable = await new Promise((resolve) => {
+            if (this.state.data) {
+                resolve(this.state.data);
+            } else {
+                this.onDataReceiveds.push(resolve);
+            }
+        });
+        console.log(timetable);
         let components = [];
-        const cellPositions = this.state.cellPositions;
         for (let x = 0; x < WEEKDAY_NAMES.length; x++) {
-            let day = this.state.data[x];
+            let day = timetable[x];
             if (day.holiday) {
                 components.push(
                     <GridAlignedBox
@@ -242,14 +257,11 @@ export default class Timetable extends Component {
                         ref="grid"
                         monday={moment().isoWeekday(1)}
                         onLayout={(layout) => this.calculateCellPositions(layout.nativeEvent.layout)}
+                        renderWeek={
+                            (i) => this.renderWeek(i)
+                        }
                     >
                     </Grid>
-                    {
-                        this.state.cellPositions && this.state.data &&
-                        <Swiper
-                            renderPage={() => this.renderWeek(this.state.data)}>
-                        </Swiper>
-                    }
                 </View>
             </View>
         );

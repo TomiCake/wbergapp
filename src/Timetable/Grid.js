@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, Animated } from 'react-native';
 import styles from './styles';
 import moment from 'moment';
+import Swiper from './Swiper';
 
 import { WEEKDAY_NAMES } from '../../const';
 import { getPeriodTimes } from '../common/periodTimes';
@@ -9,6 +10,10 @@ import { getPeriodTimes } from '../common/periodTimes';
 export default class Grid extends Component {
 
     cellPositions = [[], [], [], [], []];
+    constructor(props) {
+        super(props);
+        this.state = { animatedValue: new Animated.Value(0) };
+    }
 
     // setLayout(x, y) {
     //     return (layout) => {
@@ -33,19 +38,36 @@ export default class Grid extends Component {
 
     renderHeaderRow() {
         return (
-            <View style={styles.row}>
-                <View key={10} style={[styles.headerCell, { flex: 0 }, styles.accent]}></View>
-                {WEEKDAY_NAMES.map((name, i) => (
-                    <View key={i} style={[styles.headerRowCell, styles.accent]}>
-                        <Text style={styles.weekday} numberOfLines={1}>
-                            {name}
-                        </Text>
-                        <Text style={styles.weekday} numberOfLines={1}>
-                            {moment(this.props.monday).add(i - 1, 'days').format(" DD.MM")}
-                        </Text>
-                    </View>
-                ))}
-            </View>);
+            <View style={[styles.accent]}>
+                <Animated.View style={[styles.row, {
+                    transform: [
+                        {
+                            translateX: this.state.animatedValue.interpolate({
+                                inputRange: [0, 20],
+                                outputRange: [0, 1],
+                            })
+                        }
+                    ],
+                    opacity: this.state.animatedValue.interpolate({
+                        inputRange: [-100, 0, 100],
+                        outputRange: [0.5, 1, 0.5],
+                    })
+                }]}>
+                    <View key={10} style={[styles.headerCell, { flex: 0, backgroundColor: null }]}></View>
+                    {WEEKDAY_NAMES.map((name, i) => (
+                        <View key={i} style={[styles.headerRowCell]}>
+
+                            <Text style={styles.weekday} numberOfLines={1}>
+                                {name}
+                            </Text>
+                            <Text style={styles.weekday} numberOfLines={1}>
+                                {moment(this.props.monday).add(i - 1, 'days').format(" DD.MM")}
+                            </Text>
+                        </View>
+                    ))}
+                </Animated.View>
+            </View>
+        );
     }
 
     renderHeaderColumn(i) {
@@ -73,13 +95,25 @@ export default class Grid extends Component {
         );
     }
 
+    updateCellPositions() {
+        this.refs.swiper.updateCellPositions();
+    }
+
     render() {
         return (
             <View style={styles.container}>
                 {this.renderHeaderRow()}
-                <View style={styles.grid} onLayout={this.props.onLayout}>
+                <View style={styles.grid}>
                     {this.renderHeaderColumn(0)}
-                    {[1, 2, 3, 4, 5].map((i) => this.renderColumn(i))}
+                    <View style={styles.grid} onLayout={this.props.onLayout}>
+                        {[1, 2, 3, 4, 5].map((i) => this.renderColumn(i))}
+                        <Swiper
+                            ref="swiper"    
+                            animatedValue={this.state.animatedValue}
+                            renderWeek={this.props.renderWeek}>
+
+                        </Swiper>
+                    </View>
                 </View>
             </View>
         );

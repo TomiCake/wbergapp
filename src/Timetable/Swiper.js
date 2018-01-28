@@ -6,6 +6,20 @@ import { View, PanResponder, Animated } from 'react-native';
 
 class Page extends Component {
 
+    constructor(props) {
+        super(props);
+        this.props.onUpdateCellPositions(this.loadRender.bind(this));
+    }
+
+    loadRender() {
+        if (this.promise) return;
+        this.promise = this.props.page.renderWeek(this.props.page.index)
+            .then((rendered) => {
+                this.children = rendered;
+                this.promise = null;
+                this.forceUpdate();
+            })
+    }
 
     render() {
         let pageStyle = {
@@ -16,15 +30,32 @@ class Page extends Component {
             width: '100%',
 
         };
-        let child = this.children || this.props.children;
-        if(!child) return null;
-        if(child.then){
-            child.then((rendered) => {
-                this.children = rendered;
-                this.forceUpdate();
-            })
+        if (!this.children && !this.promise) {
+            this.loadRender();
         }
-        
+        if (this.props.right || this.props.left) {
+            let s = 200;
+            return (
+                <Animated.View style={[pageStyle, {
+
+                    transform: [
+                        {
+                            translateX: this.props.x.interpolate({
+                                inputRange: [0, 10],
+                                outputRange: [this.props.right ? s : -s, this.props.right ? s + 1 : -s + 1],
+                            })
+                        }
+                    ],
+                    opacity: this.props.x.interpolate({
+                        inputRange: [-100, 0, 100],
+                        outputRange: [this.props.right ? 0.1 : 0, 0, this.props.left ? 0.1 : 0],
+                    })
+                }]}>
+                    {this.children}
+                </Animated.View>
+            );
+        }
+
         return (
             <Animated.View style={[pageStyle, {
 
@@ -41,7 +72,7 @@ class Page extends Component {
                     outputRange: [0.5, 1, 0.5],
                 })
             }]}>
-                {child.then ? null : child}
+                {this.children}
             </Animated.View>
         );
     }
@@ -52,9 +83,9 @@ export default class Swiper extends Component {
 
     constructor(props) {
         super(props);
+        this.renderPages();
         this.state = {
-            x: new Animated.Value(0),
-            index: 0,
+            x: props.animatedValue,
         }
 
         this.panResponder = PanResponder.create({
@@ -103,31 +134,57 @@ export default class Swiper extends Component {
         });
     }
 
+    index = 1;
+    pages = [];
+
     changePage(dx) {
         if (dx > 0) {
-
+            this.index++;
+        } else {
+            this.index--;
         }
+        for (i = this.index - 1; i <= this.index + 1; i++) {
+            if (!this.pages[i])
+                this.pages[i] = { index: i, renderWeek: this.props.renderWeek  };
+        }
+        this.forceUpdate();
+
     }
 
     renderPages() {
-        let pages = [];
-        for (i = this.state.index - 1; i <= this.state.index + 1; i++) {
-            pages.push(this.props.renderPage(i));
+        for (i = this.index - 1; i <= this.index + 1; i++) {
+            this.pages[i] = { index: i, renderWeek: this.props.renderWeek };
         }
-        return pages;
+    }
+
+    updateCellPositions() {
+        console.log("updateCellPositions", this.pages);
+        this.pages.forEach((page) => page.updateCellPositions && page.updateCellPositions())
     }
 
     render() {
-        let pages = this.renderPages();
-
+        let page1 = this.pages[this.index - 1];
+        let page2 = this.pages[this.index];
+        let page3 = this.pages[this.index + 1];
+        console.log(page1);
         return (
             <View
-                style={{ position: 'absolute', width: '100%', height: '100%' }}
+                style={{ position: 'absolute', height: '100%', width: '100%' }}
                 {...this.panResponder.panHandlers}
             >
-                <Page x={this.state.x} key={0}>
-                    {pages[1]}
+
+                <Page x={this.state.x} left key={page1.index} page={page1}
+                    onUpdateCellPositions={(fn) => page1.updateCellPositions = fn}>
                 </Page>
+
+                <Page x={this.state.x} key={page2.index} page={page2}
+                    onUpdateCellPositions={(fn) => page2.updateCellPositions = fn}>
+                </Page>
+
+                <Page x={this.state.x} right key={page3.index} page={page3}
+                    onUpdateCellPositions={(fn) => page3.updateCellPositions = fn}>
+                </Page>
+
             </View>
         );
     }
