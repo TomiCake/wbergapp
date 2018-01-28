@@ -20,26 +20,29 @@ export default class Timetable extends Component {
         this.state = {
 
         };
-        if (this.props.data) this.state.data = this.parse(this.props);
+        this.timetableStore = {
+
+        }
     }
 
     componentWillReceiveProps(nextProps) {
-        if (nextProps.data) this.state.data = this.parse(nextProps);
+        
     }
 
-    parse(props) {
+    async parse(week, year) {
+        if (this.timetableStore[week + "" + year]) return this.timetableStore[week + "" + year];
+        let props = await this.props.loadFor(week, year);
         let data = [];
         for (x = 0; x < WEEKDAY_NAMES.length; x++) {
-            let day = this.readTimetable(props.data, x);
+            let day = this.readTimetable(props.timetable, x);
             if (props.substitutions) {
                 this.joinSubstitutions(day, props.substitutions[x + 1]);
             }
             this.skipDuplications(day);
-            this.translatePeriods(props.masterdata, day);
+            this.translatePeriods(this.props.masterdata, day);
             data[x] = day;
         }
-        this.onDataReceiveds.forEach((fn) => fn(data));  
-        this.onDataReceiveds = [];
+        this.timetableStore[week + "" + year] = data;
         return data;
     }
 
@@ -128,6 +131,7 @@ export default class Timetable extends Component {
     translate(masterdata, period) {
         if (!period) return period;
         period.lessons = period.lessons.map((period) => ({
+            period,
             substitutionType: period.substitutionType,
             teacher: masterdata.Teacher[period.TEACHER_ID],
             subject: masterdata.Subject[period.SUBJECT_ID],
@@ -211,6 +215,8 @@ export default class Timetable extends Component {
 
 
     renderWeek = async (i) => {
+        let date = this.props.date.clone().add(i, 'week');
+        let data = await this.parse(date.week(), date.year());
         let cellPositions = await new Promise((resolve) => {
             if (this.state.cellPositions) {
                 resolve(this.state.cellPositions);
@@ -218,17 +224,9 @@ export default class Timetable extends Component {
                 this.onCellLayouts.push(resolve);
             }
         });
-        let timetable = await new Promise((resolve) => {
-            if (this.state.data) {
-                resolve(this.state.data);
-            } else {
-                this.onDataReceiveds.push(resolve);
-            }
-        });
-        console.log(timetable);
         let components = [];
         for (let x = 0; x < WEEKDAY_NAMES.length; x++) {
-            let day = timetable[x];
+            let day = data[x];
             if (day.holiday) {
                 components.push(
                     <GridAlignedBox

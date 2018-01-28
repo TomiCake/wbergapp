@@ -10,7 +10,6 @@ class AnimatedMargin extends Animated.Value {
     }
 
     animateMargin(animatedFunction, margin, config = { duration: 250 }) {
-        Animated.spring()
         return animatedFunction(this, {
             ...config,
             bounciness: 15,
@@ -75,7 +74,7 @@ export default class GridAlignedBox extends Component {
             this.state.animatedValues.left.animateMargin(Animated.timing, margin),
             this.state.animatedValues.width.animateMargin(Animated.timing, -2 * margin),
             this.state.animatedValues.height.animateMargin(Animated.timing, -2 * margin),
-            Animated.timing(this.state.toggled, { bounciness: 15, toValue: toggled ? 1 : 0 })
+            Animated.timing(this.state.toggled, { toValue: toggled ? 1 : 0 })
         ]).start();
     }
 

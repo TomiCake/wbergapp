@@ -19,47 +19,54 @@ class TimetableView extends Component {
             myTimetable: null,
             calendarModal: false,
             date: moment().isoWeekday(1),
+            id: this.props.id.id,
+            type: this.props.id.type,
         };
+
+        this.timetableStore = {
+            
+        }
 
     }
 
-    static navigationOptions = ({ navigation }) =>({
-        header: <AppBar 
-            navigation = {navigation} 
-            onSelect = {navigation.state.params && navigation.state.params.onSelect || (() => {})} 
-            openCalendar = {navigation.state.params && navigation.state.params.openCalendar || (() => {})}
-            isLoading = {navigation.state.params && navigation.state.params.isLoading}
+    static navigationOptions = ({ navigation }) => ({
+        header: <AppBar
+            navigation={navigation}
+            onSelect={navigation.state.params && navigation.state.params.onSelect || (() => { })}
+            openCalendar={navigation.state.params && navigation.state.params.openCalendar || (() => { })}
+            isLoading={navigation.state.params && navigation.state.params.isLoading}
         />
     });
 
-    componentDidMount(){
-        this.loadData();
+    componentDidMount() {
+        this.loadMasterdata();
         this.props.navigation.setParams({
-            onSelect: this.onSelect.bind(this), 
+            onSelect: this.onSelect.bind(this),
             openCalendar: this.openCalendar.bind(this)
         });
     }
 
     componentWillUpdate(nextProps, nextState) {
-        if(nextState.loading !== this.state.loading) {
-            this.props.navigation.setParams({isLoading: !!nextState.loading});
+        if (nextState.loading !== this.state.loading) {
+            this.props.navigation.setParams({ isLoading: !!nextState.loading });
         }
     }
 
     onSelect(type, id) {
-        console.log(type,id);
+        console.log(type, id);
+        // change this.state.id and type
     }
 
     openCalendar() {
-        this.setState({calendarModal: true});
+        this.setState({ calendarModal: true });
     }
 
     closeCalendar(date) {
-        this.setState({calendarModal: false});
+        this.setState({ calendarModal: false });
         console.log(date);
     }
 
-    loadData = async () => {
+    loadMasterdata = async () => {
         try {
             this.setState({ loading: "Anzeigedaten", error: null, myTimetable: null });
             let version = (await getMasterdata(this.props.token, 'version')).version;
@@ -69,29 +76,27 @@ class TimetableView extends Component {
 
                 this.props.setMasterdata(masterdata);
             }
-            this.setState({ loading: "Stundenplandaten" });
-            let timetable = await getTimetable(this.props.token, this.props.id.type, this.props.id.id);
-
-            let substitutions = await getSubstitutions(this.props.token, this.props.id.type, this.props.id.id, '2018', '2');
-            this.setState({ loading: null, myTimetable: timetable, substitutions });
-
+            this.setState({ loading: null });
         } catch (error) {
             if (error.status === 'token_error') {
                 this.props.resetToken();
             } else {
-                this.setState({loading: "", error: error.message});
+                this.setState({ loading: "", error: error.message });
             }
             console.log(error);
         }
     }
 
-    async loadSubstitutions(week){
-        console.log(this.state.date);
-        this.setState({ loading: "neuladen"});
 
-        this.state.date.add(week, 'week');
-        let substitutions = await getSubstitutions(this.props.token, this.props.id.type, this.props.id.id, this.state.date.year(), this.state.date.isoWeek());
-        this.setState({ loading: null, substitutions });
+    loadForTimetable = async (week, year) => {
+        
+        let timetable = this.timetableStore.timetable || await (this.timetableStore.timetable = getTimetable(this.props.token, this.state.type, this.state.id));
+        this.timetableStore.timetable = timetable;
+
+        let substitutions = this.timetableStore[week + "" + year] || await getSubstitutions(this.props.token, this.state.type, this.state.id, year, week);
+        this.timetableStore[week + "" + year] = substitutions;
+
+        return { timetable, substitutions };
     }
 
     render() {
@@ -99,22 +104,22 @@ class TimetableView extends Component {
             <View style={styles.flex}>
 
                 <View style={styles.container}>
-                {this.state.error ? 
-                    <View style={styles.errorContainer}>
-                        <Text style={styles.error}>{this.state.error}</Text>
-                        <Button  title="Retry" onPress={() => this.loadData()}/>
-                    </View> :
-                    <Timetable
-                        data={this.state.myTimetable}
-                        substitutions={this.state.substitutions}
-                        masterdata={this.props.masterdata}
-                        type={this.props.id.type}
-                        onError={(error) => this.setState({error: error.message})}
-                    >
-                    </Timetable>
-                }
+                    {this.state.error ?
+                        <View style={styles.errorContainer}>
+                            <Text style={styles.error}>{this.state.error}</Text>
+                            <Button title="Retry" onPress={() => this.loadData()} />
+                        </View> :
+                        <Timetable
+                            date={this.state.date}    
+                            loadFor={this.loadForTimetable}
+                            masterdata={this.props.masterdata}
+                            type={this.state.type}
+                            onError={(error) => this.setState({ error: error.message })}
+                        >
+                        </Timetable>
+                    }
                 </View>
-                <CalendarModal visible={this.state.calendarModal} date={this.state.date} selectDate={this.closeCalendar.bind(this)}/>
+                <CalendarModal visible={this.state.calendarModal} date={this.state.date} selectDate={this.closeCalendar.bind(this)} />
             </View>
         );
     }

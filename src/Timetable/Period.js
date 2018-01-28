@@ -32,6 +32,12 @@ function renderLesson(type, lesson, i, horizontal, small) {
         }
     });
     let fields = templates[type].map((key) => lesson[key]);
+    fields = fields.map((elem) => {
+        if (!elem) {
+            return { NAME: "???", DESCRIPTION: "???" };
+        }
+        return elem;
+    });
     switch (lesson.substitutionType) {
         case "SUBSTITUTION": fields.forEach((e) => e.style = { color: 'red' }); break;
         case "ASSIGNMENT": fields.forEach((e) => e.style = { color: 'yellow' }); break;
