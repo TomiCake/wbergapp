@@ -1,8 +1,14 @@
 import React, { Component } from 'react';
 
 import { View, Text, ScrollView, Animated, TouchableWithoutFeedback, TouchableOpacity, TouchableNativeFeedback, TouchableHighlight, Dimensions } from 'react-native';
-import styles, { templates } from './period.styles';
+import styles from './period.styles';
 
+const templates = {
+    "student": ["subject", "teacher", "room"],
+    "class": ["subject", "teacher", "room"],
+    "room": ["subject", "teacher", "classes"],
+    "teacher": ["subject", "classes", "room"]
+};
 
 function PeriodText(props) {
     let textStyles = [styles.text, props.style];
@@ -36,6 +42,10 @@ function renderLesson(type, lesson, i, horizontal, small) {
     fields = fields.map((elem) => {
         if (!elem) {
             return { NAME: "???", DESCRIPTION: "???" };
+        }
+        if (elem instanceof Array) {
+            let joined = elem.map((e) => e.NAME).join('|');
+            return { NAME: joined, DESCRIPTION: joined };
         }
         return elem;
     });

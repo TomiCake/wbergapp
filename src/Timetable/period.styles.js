@@ -1,10 +1,5 @@
 import { StyleSheet } from 'react-native';
 
-export const templates = {
-    "student": ["subject", "teacher", "room"],
-    "teacher": ["subject", "classes", "room"]
-};
-
 export default StyleSheet.create({
     container: {
         position: 'absolute',
