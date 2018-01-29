@@ -8,6 +8,7 @@ import GridAlignedBox from './GridAlignedBox.animated';
 import Period from './Period';
 import { PERIOD_NUMBERS, WEEKDAY_NAMES, PERIOD_BGCOLOR, HOLIDAY_BGCOLOR } from '../../const';
 import Swiper from './Swiper';
+import GridBox from './GridBox';
 
 export default class Timetable extends Component {
     static propTypes = {
@@ -29,7 +30,7 @@ export default class Timetable extends Component {
         if (nextProps.id !== this.props.id || nextProps.type !== this.props.type) {
             // clear timetable cache
             this.timetableStore = {};
-            this.refs.grid.updateCellPositions();
+            this.refs.grid.updatePages();
         }
         if (!nextProps.date.isSame(this.props.date)) {
             // date changed
@@ -175,85 +176,77 @@ export default class Timetable extends Component {
         return true;
     }
 
-    renderPeriods(day, periods) {
-        const cellPositions = this.state.cellPositions;
-        let periodComponents = [];
-        for (y = 0; y < PERIOD_NUMBERS.length; y++) {
-            let period = periods[y];
-            if (!period || !period.lessons) continue;
-            periodComponents.push(
-                <GridAlignedBox
-                    expandable
-                    key={day * 10 + y}
-                    skip={period.skip}
-                    backgroundColor={PERIOD_BGCOLOR}
-                    boundingBox={cellPositions[day][y]}
-                    renderContent={(horizontal, toggledAnimation) =>
-                        <Period
-                            type={this.props.type}
-                            data={period.lessons}
-                            horizontal={horizontal}
-                        />
-                    }
-                />
-            );
-        }
-        return periodComponents;
-    }
-
-    calculateCellPositions(layout) {
-        const screenWidth = layout.width;
-        const screenHeight = layout.height;
-
-        let height = screenHeight / PERIOD_NUMBERS.length;
-        let width = screenWidth / WEEKDAY_NAMES.length;
-        this.state.cellPositions = [[], [], [], [], []];
-
-        for (x = 0; x < WEEKDAY_NAMES.length; x++) {
-            for (y = 0; y < PERIOD_NUMBERS.length; y++) {
-                this.state.cellPositions[x][y] = { width, height, left: width * x, top: height * y };
-            }
-        }
-        this.onCellLayouts.forEach((fn) => fn(this.state.cellPositions));
-        this.onCellLayouts = [];
-        this.refs.grid.updateCellPositions();
-    }
-    onDataReceiveds = [];
-    onCellLayouts = [];
-
-
-    renderWeek = async (i) => {
+    loadWeek = async (i) => {
         let date = this.props.date.clone().add(i, 'week');
         let data = await this.parse(date.week(), date.year());
-        let cellPositions = await new Promise((resolve) => {
-            if (this.state.cellPositions) {
-                resolve(this.state.cellPositions);
-            } else {
-                this.onCellLayouts.push(resolve);
-            }
-        });
-        let components = [];
-        for (let x = 0; x < WEEKDAY_NAMES.length; x++) {
-            let day = data[x];
-            if (day.holiday) {
-                components.push(
-                    <GridAlignedBox
-                        key={"holiday" + x}
-                        skip={PERIOD_NUMBERS.length - 1}
-                        backgroundColor={HOLIDAY_BGCOLOR}
-                        boundingBox={cellPositions[x][0]}
-                        contentContainerStyle={{ flexDirection: 'column', justifyContent: 'center' }}
-                        renderContent={(horizontal) => (
-                            <Text style={styles.holiday}>{day.holiday}</Text>
-                        )} />);
-            }
-            if (day.periods) {
-                components.push(...this.renderPeriods(x, day.periods));
-            }
-        }
-        return components;
+        return { date, data, height: PERIOD_NUMBERS.length, width: WEEKDAY_NAMES.length };
     }
 
+    renderWeek = async (i) => {
+        let content = await this.loadWeek(i);
+        let components = [];
+        for (let x = 0; x < WEEKDAY_NAMES.length; x++) {
+            let rows = [];
+            let day = content.data[x];
+            if (day.holiday) {
+                rows.push(
+                    <GridBox
+                        key={0}
+                        backgroundColor={HOLIDAY_BGCOLOR}
+                        renderContent={(horizontal) => (
+                            <Text style={styles.holiday}>{day.holiday}</Text>
+                        )}
+                    />
+                )
+            }
+            if (day.periods) {
+                for (let y = 0; y < PERIOD_NUMBERS.length; y++) {
+                    let period = day.periods[y];
+                    if (!period || !period.lessons) {
+                        rows.push(
+                            <View
+                                key={x * WEEKDAY_NAMES.length + y}
+                                style={styles.container}>
+
+                            </View>
+                        );
+                    } else {
+                        rows.push(
+                            <View
+                                key={x * WEEKDAY_NAMES.length + y}
+                                style={[styles.container, { flex: period.skip + 1 }]}>
+                                <GridBox
+                                    key={x * content.width + y}
+                                    backgroundColor={PERIOD_BGCOLOR}
+                                    renderContent={(horizontal) =>
+                                        <Period
+                                            type={this.props.type}
+                                            data={period.lessons}
+                                            horizontal={horizontal}
+                                        />}
+                                />
+                            </View>
+                        );
+                        y += period.skip;
+                    }
+                }
+            }
+            components.push(
+                <View
+                    key={x}
+                    style={styles.column}>
+                    {rows}
+                </View>
+            );
+        }
+        return (
+            <View style={styles.container}>
+                <View style={[styles.container, styles.row]}>
+                    {components}
+                </View>
+            </View>
+        );
+    }
     render() {
 
         return (
@@ -262,10 +255,7 @@ export default class Timetable extends Component {
                     <Grid
                         ref="grid"
                         monday={moment().isoWeekday(1)}
-                        onLayout={(layout) => this.calculateCellPositions(layout.nativeEvent.layout)}
-                        renderWeek={
-                            (i) => this.renderWeek(i)
-                        }
+                        renderWeek={this.renderWeek}
                     >
                     </Grid>
                 </View>

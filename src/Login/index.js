@@ -65,92 +65,78 @@ export class LoginScreen extends Component {
                 <Animated.Image
                     source={require('wbergapp/img/bg.jpg')}
                     style={styles.backgroundImage}
-                    onPress={Keyboard.dismiss} >
+                >
                 </Animated.Image>
                 {/* Dismissing keyboard manually */}
-                <View style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0
-
-                }}
-                    onPress={Keyboard.dismiss}>
+                <KeyboardAvoidingView
+                    style={{ position: 'absolute', height: '100%', width: '100%', justifyContent: 'center' }}
+                    behavior="padding"
+                    keyboardVerticalOffset={-100}>
                     <View
-                        behavior="height"
-                        style={styles.container}>
-                        <TouchableWithoutFeedback
-                            onPress={Keyboard.dismiss}>
-                            <View
-                                style={styles.card}>
-                                <ScrollView>
-                                    <View style={styles.cardHeader}>
-                                        <Image
-                                            source={require('wbergapp/img/logo.png')}
-                                            resizeMode="contain"
-                                            style={{ height: 80, marginBottom: 15 }}>
+                        style={styles.card}>
+                        <ScrollView>
+                            <View style={styles.cardHeader}>
+                                <Image
+                                    source={require('wbergapp/img/logo.png')}
+                                    resizeMode="contain"
+                                    style={{ height: 80, marginBottom: 15 }}>
 
-                                        </Image>
-                                        <Text style={{ textAlign: 'center', marginBottom: 20 }}>
-                                            Schön, dass Du diese App verwendest.
+                                </Image>
+                                <Text style={{ textAlign: 'center', marginBottom: 20 }}>
+                                    Schön, dass Du diese App verwendest.
                                     </Text>
-                                    </View>
-
-
-                                    <View style={{ flexDirection: 'row' }}>
-                                        <TextInput
-                                            style={[styles.input, { flex: 1 }]}
-                                            placeholder="email"
-                                            returnKeyType="next"
-                                            keyboardType="email-address"
-                                            autoCapitalize="none"
-                                            autoCorrect={false}
-                                            value={this.state.email}
-                                            onFocus={() => this.setState({ error: null })}
-                                            onSubmitEditing={() => this.refs.passwordInput.focus()}
-                                            ref="emailInput"
-                                            onChangeText={(text) => this.setState({ email: text })}
-                                        />
-                                        <Text style={{ marginTop: 10 }}>@wgmail.de</Text>
-                                    </View>
-                                    <TextInput
-                                        style={styles.input}
-                                        placeholder="Passwort"
-                                        returnKeyType="go"
-                                        secureTextEntry
-                                        onFocus={() => this.setState({ error: null })}
-                                        ref="passwordInput"
-                                        onSubmitEditing={this.login.bind(this)}
-                                        onChangeText={(text) => this.setState({ password: text })}
-                                    />
-
-                                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                                        <View style={{ flex: 1 }}>
-                                            <Button
-                                                onPress={this.login.bind(this)}
-                                                title="Login"
-                                                color="#3F51B5"
-                                                disabled={this.state.loggingIn}
-                                            />
-                                        </View>
-                                        {this.state.loggingIn &&
-                                            <ActivityIndicator />}
-                                    </View>
-
-                                    {this.state.error ?
-                                        (<View style={styles.error}>
-                                            <Text style={{ color: 'red' }}>
-                                                {this.state.error}
-                                            </Text>
-                                        </View>)
-                                        : null
-                                    }
-                                </ScrollView>
                             </View>
-                        </TouchableWithoutFeedback>
+                            <View style={{ flexDirection: 'row' }}>
+                                <TextInput
+                                    style={[styles.input, { flex: 1 }]}
+                                    placeholder="E-Mail"
+                                    returnKeyType="next"
+                                    keyboardType="email-address"
+                                    autoCapitalize="none"
+                                    autoCorrect={false}
+                                    value={this.state.email}
+                                    onFocus={() => this.setState({ error: null })}
+                                    onSubmitEditing={() => this.refs.passwordInput.focus()}
+                                    ref="emailInput"
+                                    onChangeText={(text) => this.setState({ email: text })}
+                                />
+                                <Text style={{ marginTop: 10 }}>@wgmail.de</Text>
+                            </View>
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Passwort"
+                                returnKeyType="go"
+                                secureTextEntry
+                                onFocus={() => this.setState({ error: null })}
+                                ref="passwordInput"
+                                onSubmitEditing={this.login.bind(this)}
+                                onChangeText={(text) => this.setState({ password: text })}
+                            />
+
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                                <View style={{ flex: 1 }}>
+                                    <Button
+                                        onPress={this.login.bind(this)}
+                                        title="Login"
+                                        color="#3F51B5"
+                                        disabled={this.state.loggingIn}
+                                    />
+                                </View>
+                                {this.state.loggingIn &&
+                                    <ActivityIndicator />}
+                            </View>
+
+                            {this.state.error ?
+                                (<View style={styles.error}>
+                                    <Text style={{ color: 'red' }}>
+                                        {this.state.error}
+                                    </Text>
+                                </View>)
+                                : null
+                            }
+                        </ScrollView>
                     </View>
-                </View>
+                </KeyboardAvoidingView>
             </View>
         );
     }

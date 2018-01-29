@@ -26,7 +26,7 @@ class Page extends Component {
             }
             return;
         }
-        return this.promise = this.props.renderWeek(this.props.page.page.index)
+        return this.promise = this.props.renderContent(this.props.page.page.index)
             .then((rendered) => {
                 this.children = rendered;
                 this.promise = null;
@@ -103,7 +103,7 @@ export default class Swiper extends Component {
         super(props);
         this.setIndex(this.index);
         this.state = {
-            x: props.animatedValue,
+            x: new Animated.Value(0),
         }
 
         this.panResponder = PanResponder.create({
@@ -194,7 +194,7 @@ export default class Swiper extends Component {
         this.masterPage.slaves = newPages.slice().splice(index);
     }
 
-    updateCellPositions() {
+    update() {
         this.masterPage.update(true);
     }
 
@@ -206,12 +206,12 @@ export default class Swiper extends Component {
                 style={{ position: 'absolute', height: '100%', width: '100%' }}
                 {...this.panResponder.panHandlers}
             >
-                <Page x={this.state.x} left key={left.index} page={{ page: left }} renderWeek={this.props.renderWeek}/>
-                <Page x={this.state.x} right key={right.index} page={{ page: right }} renderWeek={this.props.renderWeek}/>
+                <Page x={this.state.x} left key={left.index} page={{ page: left }} renderContent={this.props.renderContent}/>
+                <Page x={this.state.x} right key={right.index} page={{ page: right }} renderContent={this.props.renderContent}/>
                 <Page x={this.state.x}
                     slaves={[left, right]}
                     key={this.masterPage.index}
-                    page={{ page: this.masterPage }} renderWeek={this.props.renderWeek}/>
+                    page={{ page: this.masterPage }} renderContent={this.props.renderContent}/>
             </View>
         );
     }
