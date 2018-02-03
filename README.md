@@ -11,7 +11,20 @@ To deploy the app on your phone:
 npm install -g react-native
 npm install
 react-native run-android | run-ios
+```
+Android SDK packages you need:
 
-##Contributers
-TomiCake
+```
+Android SDK Platform-tools, revision 27.0.1
+Android SDK Build-tools, revision 23.0.1
+Android SDK Build-tools, revision 26.0.1
+Android SDK Tools, revision 25.2.5
+Android SDK Platform 23 Revision 3
+SDK Platform Android 8.0.0, API 26, revision 2
+Android Support Repository, revision 47
+```
+
+## Contributers
+
+TomiCake  
 Michael-Janke

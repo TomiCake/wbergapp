@@ -4,19 +4,78 @@ import React, { Component } from 'react';
 import { View, PanResponder, Animated, Dimensions } from 'react-native';
 
 
+
 class Page extends Component {
 
     constructor(props) {
         super(props);
-
         this.props.page.page.update = this.loadRender.bind(this);
-
+    }
+    renderChildren() {
+        return this.props.children;
     }
 
-    componentDidMount() {
+    render() {
+        let pageStyle = {
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            height: '100%',
+            width: '100%',
+
+        };
+        if (this.props.right || this.props.left) {
+            const space = 100;
+            return (
+                <Animated.View style={[pageStyle, {
+                    elevation: 0,
+                    transform: [
+                        {
+                            translateX: this.props.x.interpolate({
+                                inputRange: [-2, -0.1, 0.1, 2],
+                                outputRange: [0, space, -space, 0],
+                            })
+                        }
+                    ],
+                    opacity: this.props.x.interpolate({
+                        inputRange: [-2, -0.1, 0.1, 2],
+                        outputRange: [this.props.right ? 1 : 0, 0, 0, this.props.left ? 1 : 0],
+                    })
+                }]}>
+                    {this.renderChildren()}
+                </Animated.View>
+            );
+        }
+
+
+
+        return (
+            <Animated.View style={[pageStyle, {
+                elevation: 1,
+                transform: [
+                    {
+                        translateX: this.props.x.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [0, 50],
+                        })
+                    }
+                ],
+                opacity: this.props.x.interpolate({
+                    inputRange: [-1, 0, 1],
+                    outputRange: [0.5, 1, 0.5],
+                })
+            }]}>
+                {this.renderChildren()}
+            </Animated.View>
+        );
     }
-    componentWillUnmount() {
-        console.log("unmound" + this.props.page.page.index)
+}
+
+class PromisePage extends Page {
+
+    constructor(props) {
+        super(props);
+
     }
 
     loadRender(force) {
@@ -38,64 +97,17 @@ class Page extends Component {
             });
     }
 
+    renderChildren() {
+        return this.children;
+    }
+
     render() {
-        let pageStyle = {
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            height: '100%',
-            width: '100%',
-
-        };
-
-        if (this.props.right || this.props.left) {
-            let s = 200;
-            return (
-                <Animated.View style={[pageStyle, {
-                    elevation: 0,
-                    transform: [
-                        {
-                            translateX: this.props.x.interpolate({
-                                inputRange: [0, 10],
-                                outputRange: [this.props.right ? s : -s, this.props.right ? s + 1 : -s + 1],
-                            })
-                        }
-                    ],
-                    opacity: this.props.x.interpolate({
-                        inputRange: [-100, 0, 100],
-                        outputRange: [this.props.right ? 0.1 : 0, 0, this.props.left ? 0.1 : 0],
-                    })
-                }]}>
-                    {this.children}
-                </Animated.View>
-            );
-        }
-        if (!this.children && !this.promise) {
+        if (!(this.props.left || this.props.right) && !this.children && !this.promise) {
             this.loadRender();
         }
-
-        return (
-            <Animated.View style={[pageStyle, {
-                elevation: 1,
-                transform: [
-                    {
-                        translateX: this.props.x.interpolate({
-                            inputRange: [0, 10],
-                            outputRange: [0, 1],
-                        })
-                    }
-                ],
-                opacity: this.props.x.interpolate({
-                    inputRange: [-100, 0, 100],
-                    outputRange: [0.5, 1, 0.5],
-                })
-            }]}>
-                {this.children}
-            </Animated.View>
-        );
+        return super.render();
     }
 }
-
 
 export default class Swiper extends Component {
 
@@ -120,27 +132,28 @@ export default class Swiper extends Component {
                 // gestureState.d{x,y} will be set to zero now
             },
             onPanResponderMove: (evt, gestureState) => {
-                if (this.anim || this.locked) return false;
+                if (this.locked) return false;
+                const { height, width } = Dimensions.get('window');
                 if (Math.abs(gestureState.dx) >= 150 / Math.max(1, Math.abs(gestureState.vx * 0.7))) {
                     //this.changePage(gestureState.dx);
-                    this.anim = Animated.spring(this.state.x, {
-                        toValue: gestureState.dx > 0 ? Dimensions.get('window').width * 5 + 200 : - Dimensions.get('window').width * 5 - 200,
+
+                    this.locked = true;
+                    const anim = this.anim = Animated.spring(this.state.x, {
+                        toValue: gestureState.dx > 0 ? 2 : - 2,
                         useNativeDriver: true
                     });
                     const s = gestureState.dx;
+
                     this.anim.start(() => {
-
+                        if (anim === this.anim) {
+                            this.state.x.setValue(0);
+                            this.changePage(s);
+                            this.anim = null;
+                        }
                     });
-                    setTimeout(() => {
-                        this.changePage(s);
-                        this.state.x.setValue(0);
-                        this.locked = true;
-                        this.anim = null;
-                    }, 1);
-
                     return false;
                 }
-                this.state.x.setValue(gestureState.dx);
+                this.state.x.setValue(gestureState.dx / width);
             },
             onPanResponderTerminationRequest: (evt, gestureState) => true,
             onPanResponderRelease: (evt, gestureState) => {
@@ -206,12 +219,12 @@ export default class Swiper extends Component {
                 style={{ position: 'absolute', height: '100%', width: '100%' }}
                 {...this.panResponder.panHandlers}
             >
-                <Page x={this.state.x} left key={left.index} page={{ page: left }} renderContent={this.props.renderContent}/>
-                <Page x={this.state.x} right key={right.index} page={{ page: right }} renderContent={this.props.renderContent}/>
-                <Page x={this.state.x}
+                <PromisePage x={this.state.x} left key={left.index} page={{ page: left }} renderContent={this.props.renderContent} />
+                <PromisePage x={this.state.x} right key={right.index} page={{ page: right }} renderContent={this.props.renderContent} />
+                <PromisePage x={this.state.x}
                     slaves={[left, right]}
                     key={this.masterPage.index}
-                    page={{ page: this.masterPage }} renderContent={this.props.renderContent}/>
+                    page={{ page: this.masterPage }} renderContent={this.props.renderContent} />
             </View>
         );
     }
