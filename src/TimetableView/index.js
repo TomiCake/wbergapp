@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Animated, ActivityIndicator, View, Text } from 'react-native';
+import { Animated, ActivityIndicator, View, Text, Button } from 'react-native';
 import styles from './styles';
 import { connect } from 'react-redux';
 import { getMasterdata, getTimetable, getSubstitutions } from './api';
@@ -72,10 +72,9 @@ class TimetableView extends Component {
         try {
             this.setState({ loading: "Anzeigedaten", error: null, myTimetable: null });
             let version = (await getMasterdata(this.props.token, 'version')).version;
-            if (this.props.masterdataVersion !== version) {
+            if (this.props.masterdataVersion !== version || true) {
                 let masterdata = await getMasterdata(this.props.token, 'all');
                 console.log("reloaded masterdata");
-
                 this.props.setMasterdata(masterdata);
             }
             this.setState({ loading: null });

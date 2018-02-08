@@ -1,5 +1,5 @@
-import { API_URL } from "../../const";
-import { checkStatus } from "../common/apiHelper";
+import { API_URL } from '../const';
+import { checkStatus } from "../common";
 
 export function getMasterdata(token, url) {
     return fetch(`${API_URL}/${url}`, {
@@ -10,11 +10,11 @@ export function getMasterdata(token, url) {
             'Content-Type': 'application/json'
         }
     })
-    .then(checkStatus)
-    .then((response) => response.json())
-    .catch(async (error) => {
-        throw await error.response.json();
-    });
+        .then(checkStatus)
+        .then((response) => response.json())
+        .catch(async (error) => {
+            throw await error.response.json();
+        });
 }
 
 export function getSubstitutions(token, type, id, year, week) {
@@ -26,11 +26,26 @@ export function getSubstitutions(token, type, id, year, week) {
             'Content-Type': 'application/json'
         }
     })
-    .then(checkStatus)
-    .then((response) => response.json())
-    .catch(async (error) => {
-        throw await error.response.json();
-    });
+        .then(checkStatus)
+        .then((response) => response.json())
+        .catch(async (error) => {
+            throw await error.response.json();
+        });
+}
+export function getSubstitutionsAll(token, year, week) {
+    return fetch(`${API_URL}/substitution/all/0/${year}-${week}`, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        }
+    })
+        .then(checkStatus)
+        .then((response) => response.json())
+        .catch(async (error) => {
+            throw await error.response.json();
+        });
 }
 
 export function getTimetable(token, type, id) {
@@ -42,9 +57,9 @@ export function getTimetable(token, type, id) {
             'Content-Type': 'application/json'
         }
     })
-    .then(checkStatus)
-    .then((response) => response.json())
-    .catch(async (error) => {
-        throw await error.response.json();
-    });
+        .then(checkStatus)
+        .then((response) => response.json())
+        .catch(async (error) => {
+            throw await error.response.json();
+        });
 }

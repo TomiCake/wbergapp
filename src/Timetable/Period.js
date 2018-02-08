@@ -51,8 +51,9 @@ function renderLesson(type, lesson, i, horizontal, small) {
     switch (lesson.substitutionType) {
         case "SUBSTITUTION": fields.forEach((e) => e.style = { color: 'red' }); break;
         case "ASSIGNMENT": fields.forEach((e) => e.style = { color: 'yellow' }); break;
-        case "ROOM_SUBSTITUTION": lesson.room.style = { color: 'green' }; break;
+        case "ROOM_SUBSTITUTION": lesson.room.style = { color: 'cyan' }; break;
         case "EXTRA_LESSON": fields.forEach((e) => e.style = { color: 'red' }); break;
+        case "ELIMINATION": fields.forEach((e) => e.style = {color: 'green'}); break;    
     }
 
 

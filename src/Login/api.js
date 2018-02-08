@@ -1,6 +1,5 @@
-import { API_URL } from "../../const";
-import { checkStatus } from "../common/apiHelper";
-
+import { API_URL } from '../const';
+import { checkStatus } from "../common";
 
 export function getToken(email, password) {
     return fetch(`${API_URL}/token`, {
@@ -11,9 +10,9 @@ export function getToken(email, password) {
             'Content-Type': 'application/json'
         }
     })
-    .then(checkStatus)
-    .then((response) => response.json())
-    .catch(async (error) => {
-        throw await error.response.json();
-    });
+        .then(checkStatus)
+        .then((response) => response.json())
+        .catch(async (error) => {
+            throw await error.response.json();
+        });
 }

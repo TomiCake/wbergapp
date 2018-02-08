@@ -123,21 +123,25 @@ export default class Swiper extends Component {
             onStartShouldSetPanResponder: (evt, gestureState) => false,
             onStartShouldSetPanResponderCapture: (evt, gestureState) => false,
             onMoveShouldSetPanResponder: (evt, gestureState) => false,
-            onMoveShouldSetPanResponderCapture: (evt, gestureState) => Math.abs(gestureState.dx) > 10,
+            onMoveShouldSetPanResponderCapture: (evt, gestureState) =>
+                Math.abs(gestureState.dy) < 10 && Math.abs(gestureState.dx) > 10,
 
             onPanResponderGrant: (evt, gestureState) => {
                 // The gesture has started. Show visual feedback so the user knows
                 // what is happening!
+                console.log("onPanResponderGrant");
 
                 // gestureState.d{x,y} will be set to zero now
             },
             onPanResponderMove: (evt, gestureState) => {
                 if (this.locked) return false;
-                const { height, width } = Dimensions.get('window');
                 if (Math.abs(gestureState.dx) >= 150 / Math.max(1, Math.abs(gestureState.vx * 0.7))) {
                     //this.changePage(gestureState.dx);
 
                     this.locked = true;
+                    if (this.anim) {
+                        this.anim.stop();
+                    }
                     const anim = this.anim = Animated.spring(this.state.x, {
                         toValue: gestureState.dx > 0 ? 2 : - 2,
                         useNativeDriver: true
@@ -153,7 +157,7 @@ export default class Swiper extends Component {
                     });
                     return false;
                 }
-                this.state.x.setValue(gestureState.dx / width);
+                this.state.x.setValue(gestureState.dx / 200);
             },
             onPanResponderTerminationRequest: (evt, gestureState) => true,
             onPanResponderRelease: (evt, gestureState) => {
@@ -170,10 +174,19 @@ export default class Swiper extends Component {
             onPanResponderTerminate: (evt, gestureState) => {
                 // Another component has become the responder, so this gesture
                 // should be cancelled
+                console.log("onPanResponderTerminate");
+                this.locked = false;
+                if (!this.anim) {
+                    this.anim = Animated.spring(this.state.x, {
+                        toValue: 0,
+                        useNativeDriver: true,
+                    }).start();
+                }
             },
             onShouldBlockNativeResponder: (evt, gestureState) => {
                 // Returns whether this component should block native components from becoming the JS
                 // responder. Returns true by default. Is currently only supported on android.
+                console.log("onShouldBlockNativeResponder");
                 return false;
             },
         });
@@ -207,7 +220,7 @@ export default class Swiper extends Component {
         this.masterPage.slaves = newPages.slice().splice(index);
     }
 
-    update() {
+    updatePages() {
         this.masterPage.update(true);
     }
 

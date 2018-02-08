@@ -4,9 +4,8 @@ import PropTypes from 'prop-types';
 import { View, Text, ActivityIndicator, Animated } from 'react-native';
 import moment from 'moment';
 import Grid from './Grid';
-import GridAlignedBox from './GridAlignedBox.animated';
 import Period from './Period';
-import { PERIOD_NUMBERS, WEEKDAY_NAMES, PERIOD_BGCOLOR, HOLIDAY_BGCOLOR } from '../../const';
+import { PERIOD_NUMBERS, WEEKDAY_NAMES, PERIOD_BGCOLOR, HOLIDAY_BGCOLOR } from '../const';
 import Swiper from './Swiper';
 import GridBox from './GridBox';
 
@@ -22,7 +21,7 @@ export default class Timetable extends Component {
         };
         this.timetableStore = {
 
-        }
+        };
     }
 
     componentWillReceiveProps(nextProps) {

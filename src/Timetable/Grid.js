@@ -5,7 +5,7 @@ import moment from 'moment';
 import Swiper from './Swiper';
 import GridBox from './GridBox';
 
-import { WEEKDAY_NAMES } from '../../const';
+import { WEEKDAY_NAMES, PERIOD_NUMBERS } from '../const';
 import { getPeriodTimes } from '../common/periodTimes';
 
 export default class Grid extends Component {
@@ -31,7 +31,7 @@ export default class Grid extends Component {
         return (
             <View key={i} style={[styles.column]}>
 
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((y) => this.renderCell(i, y))}
+                {PERIOD_NUMBERS.map((y) => this.renderCell(i, y))}
             </View>
         );
     }
@@ -58,15 +58,15 @@ export default class Grid extends Component {
     renderHeaderColumn(i) {
         return (
             <View key={i} style={[styles.column, styles.headerColumn]}>
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(this.renderTimeCell.bind(this))}
+                {PERIOD_NUMBERS.map(this.renderTimeCell.bind(this))}
             </View>
         )
     }
 
     renderTimeCell(i) {
-        let periodTimes = getPeriodTimes(i - 1, this.props.secondary);
+        let periodTimes = getPeriodTimes(i, this.props.secondary);
         return (
-            <View key={i} style={[styles.headerCell, i % 2 == 0 ? styles.accent : null]}>
+            <View key={i} style={[styles.headerCell, i % 2 == 1 ? styles.accent : null]}>
                 <Text style={styles.period}>{i}</Text>
                 <Text style={styles.time}>{periodTimes.start}</Text>
                 <Text style={styles.time}>{periodTimes.end}</Text>
@@ -75,7 +75,7 @@ export default class Grid extends Component {
     }
     renderCell(x, y) {
         return (
-            <View key={y} style={[styles.cell, y % 2 == 0 ? styles.accent : null]}>
+            <View key={y} style={[styles.cell, y % 2 == 1 ? styles.accent : null]}>
             </View>
         );
     }
@@ -87,7 +87,6 @@ export default class Grid extends Component {
     render() {
         return (
             <View style={styles.container}>
-                {this.renderHeaderRow()}    
                 <View style={styles.grid}>
                     {this.renderHeaderColumn(0)}
                     <View style={styles.grid}>

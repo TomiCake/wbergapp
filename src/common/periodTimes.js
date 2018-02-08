@@ -1,7 +1,7 @@
 const BREAKS = [
-    { period: 2, time: 15 },
-    { period: 4, secondaryPeriod: 5, time: 20 },
-    { period: 6, time: 5 },
+    { period: 3, time: 15 },
+    { period: 5, secondaryPeriod: 6, time: 20 },
+    { period: 7, time: 5 },
 ];
 
 function formatDate(date) {
@@ -18,8 +18,8 @@ export function getPeriodTimes(period, secondary) {
         }
     }
 
-    date.setHours(8);
-    date.setMinutes(0);
+    date.setHours(7);
+    date.setMinutes(10);
     date.setMinutes(
         date.getMinutes() // start minutes
         + period * 45     // time of one period
