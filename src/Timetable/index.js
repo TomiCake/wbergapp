@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import styles from './styles';
 import PropTypes from 'prop-types';
-import { View, Text, ActivityIndicator, Animated } from 'react-native';
+import { View, Text, ActivityIndicator, Animated, Platform} from 'react-native';
 import moment from 'moment';
 import Grid from './Grid';
 import Period from './Period';
@@ -17,7 +17,7 @@ export default class Timetable extends Component {
     constructor(props) {
         super(props);
         this.state = {
-
+            startDate: this.props.date
         };
         this.timetableStore = {
 
@@ -31,8 +31,10 @@ export default class Timetable extends Component {
             this.timetableStore = {};
             this.refs.grid.updatePages();
         }
-        if (!nextProps.date.isSame(this.props.date)) {
+        let diff = this.props.date.diff(nextProps.date, 'week');
+        if (diff !== 0) {
             // date changed
+            this.refs.grid.updateDate(diff);
         }
     }
 
@@ -175,18 +177,17 @@ export default class Timetable extends Component {
         return true;
     }
 
-    loadWeek = async (i) => {
-        let date = this.props.date.clone().add(i, 'week');
+    loadWeek = async (date) => {
         let data = await this.parse(date.week(), date.year());
-        return { date, data, height: PERIOD_NUMBERS.length, width: WEEKDAY_NAMES.length };
+        return data;
     }
 
-    renderWeek = async (i) => {
-        let content = await this.loadWeek(i);
+    renderWeek = async (page) => {
+        let content = await this.loadWeek(page.date);
         let components = [];
         for (let x = 0; x < WEEKDAY_NAMES.length; x++) {
             let rows = [];
-            let day = content.data[x];
+            let day = content[x];
             if (day.holiday) {
                 rows.push(
                     <GridBox
@@ -215,7 +216,7 @@ export default class Timetable extends Component {
                                 key={x * WEEKDAY_NAMES.length + y}
                                 style={[styles.container, { flex: period.skip + 1 }]}>
                                 <GridBox
-                                    key={x * content.width + y}
+                                    key={x * WEEKDAY_NAMES.length + y}
                                     backgroundColor={PERIOD_BGCOLOR}
                                     renderContent={(horizontal) =>
                                         <Period
@@ -255,6 +256,8 @@ export default class Timetable extends Component {
                         ref="grid"
                         monday={moment().isoWeekday(1)}
                         renderWeek={this.renderWeek}
+                        startDate={this.state.startDate}
+                        hasPanResponder={Platform.OS !== 'web'}
                     >
                     </Grid>
                 </View>

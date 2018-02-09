@@ -17,7 +17,7 @@ class TimetableView extends Component {
             error: null,
             myTimetable: null,
             calendarModal: false,
-            date: moment().isoWeekday(1),
+            date: moment().isoWeekday(1).startOf('day'),
             id: this.props.id.id,
             type: this.props.id.type,
         };
@@ -63,8 +63,9 @@ class TimetableView extends Component {
     }
 
     closeCalendar(date) {
-        this.setState({ calendarModal: false });
-        console.log(date);
+        let d = moment(date.dateString).isoWeekday(1);
+        this.setState({ calendarModal: false, date: d});
+        console.log(d, this.state.date);
     }
 
     loadMasterdata = async () => {

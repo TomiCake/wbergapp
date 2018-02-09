@@ -5,12 +5,11 @@ import moment from 'moment';
 import Swiper from './Swiper';
 import GridBox from './GridBox';
 
-import { WEEKDAY_NAMES, PERIOD_NUMBERS } from '../const';
+import { WEEKDAY_NAMES, PERIOD_NUMBERS, DATES_HEIGHT } from '../const';
 import { getPeriodTimes } from '../common/periodTimes';
 
 export default class Grid extends Component {
 
-    cellPositions = [[], [], [], [], []];
     constructor(props) {
         super(props);
     }
@@ -30,16 +29,15 @@ export default class Grid extends Component {
     renderColumn(i) {
         return (
             <View key={i} style={[styles.column]}>
-
+                {this.renderHeaderSpacing()}
                 {PERIOD_NUMBERS.map((y) => this.renderCell(i, y))}
             </View>
         );
     }
 
-    renderHeaderRow() {
+    renderHeaderRow(page) {
         return (
-            <View style={[styles.accent, styles.row]}>
-                <View key={10} style={[styles.headerCell, { flex: 0, backgroundColor: null }]}></View>
+            <View style={[styles.row]}>
                 {WEEKDAY_NAMES.map((name, i) => (
                     <View key={i} style={[styles.headerRowCell]}>
 
@@ -47,7 +45,7 @@ export default class Grid extends Component {
                             {name}
                         </Text>
                         <Text style={styles.weekday} numberOfLines={1}>
-                            {moment(this.props.monday).add(i - 1, 'days').format(" DD.MM")}
+                            {page.date.clone().add(i, 'days').format("DD.MM")}
                         </Text>
                     </View>
                 ))}
@@ -55,9 +53,16 @@ export default class Grid extends Component {
         );
     }
 
+    renderHeaderSpacing() {
+        return (
+            <View style={[{ height: DATES_HEIGHT }, styles.accent]} />
+        );
+    }
+
     renderHeaderColumn(i) {
         return (
             <View key={i} style={[styles.column, styles.headerColumn]}>
+                {this.renderHeaderSpacing()}
                 {PERIOD_NUMBERS.map(this.renderTimeCell.bind(this))}
             </View>
         )
@@ -71,7 +76,7 @@ export default class Grid extends Component {
                 <Text style={styles.time}>{periodTimes.start}</Text>
                 <Text style={styles.time}>{periodTimes.end}</Text>
             </View>
-        )
+        );
     }
     renderCell(x, y) {
         return (
@@ -84,18 +89,26 @@ export default class Grid extends Component {
         this.refs.swiper.updatePages();
     }
 
+    updateDate(date) {
+        this.refs.swiper.updateDate(date);
+    }
+
     render() {
         return (
-            <View style={styles.container}>
+            <View style={[styles.container, styles.grid]}>
+                {this.renderHeaderColumn(0)}
                 <View style={styles.grid}>
-                    {this.renderHeaderColumn(0)}
-                    <View style={styles.grid}>
-                        {[1, 2, 3, 4, 5].map((i) => this.renderColumn(i))}
-                        <Swiper
-                            ref="swiper"
-                            renderContent={this.props.renderWeek}>
-                        </Swiper>
-                    </View>
+                    {[1, 2, 3, 4, 5].map((i) => this.renderColumn(i))}
+                    <Swiper
+                        ref="swiper"
+                        renderContent={this.props.renderWeek}
+                        renderHeaderRow={this.renderHeaderRow.bind(this)}
+                        startDate={this.props.startDate}
+                        minIndex={0}
+                        maxIndex={10}
+                        hasPanResponder={this.props.hasPanResponder}
+                    >
+                    </Swiper>
                 </View>
             </View>
         );

@@ -1,6 +1,6 @@
 
 import React, { Component } from 'react';
-
+import { DATES_HEIGHT } from '../const';
 import { View, PanResponder, Animated, Dimensions } from 'react-native';
 
 
@@ -9,7 +9,7 @@ class Page extends Component {
 
     constructor(props) {
         super(props);
-        this.props.page.page.update = this.loadRender.bind(this);
+        this.props.page.page.update = () => { };
     }
     renderChildren() {
         return this.props.children;
@@ -75,24 +75,24 @@ class PromisePage extends Page {
 
     constructor(props) {
         super(props);
-
+        this.props.page.page.update = this.loadRender.bind(this);
     }
 
     loadRender(force) {
         if (this.promise || !force && this.children) {
             if (this.props.slaves) {
-                this.props.slaves.forEach((slave) => slave.update(force));
+                this.props.slaves.forEach((slave) => slave && slave.update(force));
             }
             return;
         }
-        return this.promise = this.props.renderContent(this.props.page.page.index)
+        return this.promise = this.props.renderContent(this.props.page.page)
             .then((rendered) => {
                 this.children = rendered;
                 this.promise = null;
                 this.forceUpdate();
                 console.log("rendered" + this.props.page.page.index);
                 if (this.props.slaves) {
-                    this.props.slaves.forEach((slave) => slave.update(force));
+                    this.props.slaves.forEach((slave) => slave && slave.update(force));
                 }
             });
     }
@@ -118,7 +118,7 @@ export default class Swiper extends Component {
             x: new Animated.Value(0),
         }
 
-        this.panResponder = PanResponder.create({
+        this.panResponder = props.hasPanResponder && PanResponder.create({
             // Ask to be the responder:
             onStartShouldSetPanResponder: (evt, gestureState) => false,
             onStartShouldSetPanResponderCapture: (evt, gestureState) => false,
@@ -135,26 +135,10 @@ export default class Swiper extends Component {
             },
             onPanResponderMove: (evt, gestureState) => {
                 if (this.locked) return false;
-                if (Math.abs(gestureState.dx) >= 150 / Math.max(1, Math.abs(gestureState.vx * 0.7))) {
+                if (Math.abs(gestureState.dx) >= 150 / Math.max(1, Math.abs(gestureState.vx * 0.7))
+                    && this.canChangePage(gestureState.dx)) {
                     //this.changePage(gestureState.dx);
-
-                    this.locked = true;
-                    if (this.anim) {
-                        this.anim.stop();
-                    }
-                    const anim = this.anim = Animated.spring(this.state.x, {
-                        toValue: gestureState.dx > 0 ? 2 : - 2,
-                        useNativeDriver: true
-                    });
-                    const s = gestureState.dx;
-
-                    this.anim.start(() => {
-                        if (anim === this.anim) {
-                            this.state.x.setValue(0);
-                            this.changePage(s);
-                            this.anim = null;
-                        }
-                    });
+                    this.animate(gestureState.dx > 0 ? 1 : -1);
                     return false;
                 }
                 this.state.x.setValue(gestureState.dx / 200);
@@ -192,27 +176,50 @@ export default class Swiper extends Component {
         });
     }
 
-    index = 1;
+    index = 0;
     pages = [];
     masterPage;
 
-    changePage(dx, callback) {
-        if (dx < 0) {
-            this.index++;
-        } else {
-            this.index--;
+    canChangePage(dx) {
+        return dx > 0 ? this.index > this.props.minIndex : this.index < this.props.maxIndex;
+    }
+
+    updateDate(diff) {
+        this.animate(diff);
+    }
+
+    animate(diff) {
+        this.locked = true;
+        if (this.anim) {
+            this.anim.stop();
         }
+        const anim = this.anim = Animated.spring(this.state.x, {
+            toValue: diff * 2,
+            useNativeDriver: true
+        });
+
+        this.anim.start(() => {
+            if (anim === this.anim) {
+                this.state.x.setValue(0);
+                this.changePage(-diff);
+                this.anim = null;
+            }
+        });
+    }
+
+    changePage(dx, callback) {
+        this.index += dx;
         this.setIndex(this.index);
         this.forceUpdate(() => this.masterPage.update());
     }
-
+    // this.props.date + this.index
     setIndex(index) {
         let newPages = [];
-        for (i = index - 1; i <= index + 1; i++) {
+        for (i = Math.max(index - 1, this.props.minIndex); i <= Math.min(index + 1, this.props.maxIndex); i++) {
             if (this.pages[i]) {
                 newPages[i] = this.pages[i];
             } else {
-                newPages[i] = { index: i };
+                newPages[i] = { index: i, date: this.props.startDate.clone().add(i, 'week') };
             }
         }
         this.pages = newPages;
@@ -227,18 +234,46 @@ export default class Swiper extends Component {
     render() {
         let left = this.pages[this.index - 1];
         let right = this.pages[this.index + 1];
+        let dateAnimation = this.state.x.interpolate({
+            inputRange: [-2, -1, 0, 1, 2],
+            outputRange: [-2, -0.5, 0, 0.5, 2]
+        });
+
+        const { renderHeaderRow, renderContent } = this.props;
         return (
-            <View
-                style={{ position: 'absolute', height: '100%', width: '100%' }}
-                {...this.panResponder.panHandlers}
-            >
-                <PromisePage x={this.state.x} left key={left.index} page={{ page: left }} renderContent={this.props.renderContent} />
-                <PromisePage x={this.state.x} right key={right.index} page={{ page: right }} renderContent={this.props.renderContent} />
-                <PromisePage x={this.state.x}
-                    slaves={[left, right]}
-                    key={this.masterPage.index}
-                    page={{ page: this.masterPage }} renderContent={this.props.renderContent} />
-            </View>
+            <View style={{ position: 'absolute', height: '100%', width: '100%', flexDirection: 'column' }}>
+                <View style={{ height: DATES_HEIGHT }}>
+                    {left &&
+                        <Page x={dateAnimation} left key={left.key} page={{ page: left }}>
+                            {renderHeaderRow(left)}
+                        </Page>
+                    }
+                    {right &&
+                        <Page x={dateAnimation} right key={right.key} page={{ page: right }}>
+                            {renderHeaderRow(right)}
+                        </Page>
+                    }
+                    <Page x={dateAnimation}
+                        slaves={[left, right]} key={this.masterPage.key} page={{ page: this.masterPage }}>
+                        {renderHeaderRow(this.masterPage)}
+                    </Page>
+                </View>
+                <View
+                    style={{ flex: 1 }}
+                    {...(this.panResponder.panHandlers || {})}
+                >
+                    {left &&
+                        <PromisePage x={this.state.x} left key={left.index} page={{ page: left }} renderContent={renderContent} />
+                    }
+                    {right &&
+                        <PromisePage x={this.state.x} right key={right.index} page={{ page: right }} renderContent={renderContent} />
+                    }
+                    <PromisePage x={this.state.x}
+                        slaves={[left, right]}
+                        key={this.masterPage.index}
+                        page={{ page: this.masterPage }} renderContent={renderContent} />
+                </View>
+            </View >
         );
     }
 }
