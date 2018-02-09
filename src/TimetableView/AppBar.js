@@ -18,7 +18,7 @@ export default class AppBar extends Component {
                 <View style={styles.firstRow}>
                     <StatusBar backgroundColor={"#1976D2"}/>
                     <Image
-                        source={require('wbergapp/img/logowhite.png')}
+                        source={require('../../img/logowhite.png')}
                         resizeMode="contain"
                         style={{ height: 35, width: 90 }}>
                     </Image>

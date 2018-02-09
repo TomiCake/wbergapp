@@ -28,27 +28,13 @@ class TimetableView extends Component {
 
     }
 
-    static navigationOptions = ({ navigation }) => ({
-        header: <AppBar
-            navigation={navigation}
-            onSelect={navigation.state.params && navigation.state.params.onSelect || (() => { })}
-            openCalendar={navigation.state.params && navigation.state.params.openCalendar || (() => { })}
-            isLoading={navigation.state.params && navigation.state.params.isLoading}
-        />
-    });
 
     componentDidMount() {
         this.loadMasterdata();
-        this.props.navigation.setParams({
-            onSelect: this.onSelect.bind(this),
-            openCalendar: this.openCalendar.bind(this)
-        });
     }
 
     componentWillUpdate(nextProps, nextState) {
-        if (nextState.loading !== this.state.loading) {
-            this.props.navigation.setParams({ isLoading: !!nextState.loading });
-        }
+
     }
 
     onSelect(id, type) {
@@ -104,7 +90,7 @@ class TimetableView extends Component {
     render() {
         return (
             <View style={styles.flex}>
-
+                <AppBar/>
                 <View style={styles.container}>
                     {this.state.error ?
                         <View style={styles.errorContainer}>
@@ -122,7 +108,6 @@ class TimetableView extends Component {
                         </Timetable>
                     }
                 </View>
-                <CalendarModal visible={this.state.calendarModal} date={this.state.date} selectDate={this.closeCalendar.bind(this)} />
             </View>
         );
     }

@@ -63,7 +63,7 @@ export class LoginScreen extends Component {
         return (
             <View style={{ flex: 1 }}>
                 <Animated.Image
-                    source={require('wbergapp/img/bg.jpg')}
+                    source={require('../../img/bg.jpg')}
                     style={styles.backgroundImage}
                 >
                 </Animated.Image>
@@ -77,7 +77,7 @@ export class LoginScreen extends Component {
                         <ScrollView>
                             <View style={styles.cardHeader}>
                                 <Image
-                                    source={require('wbergapp/img/logo.png')}
+                                    source={require('../../img/logo.png')}
                                     resizeMode="contain"
                                     style={{ height: 80, marginBottom: 15 }}>
 
