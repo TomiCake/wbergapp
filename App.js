@@ -17,6 +17,7 @@ import devToolsEnhancer from 'remote-redux-devtools';
 import authReducer from './src/Login/reducer';
 import timetableReducer from './src/TimetableView/reducer';
 import LoginBearer from './src/Login/LoginBearer';
+import AnonymousBearer from './src/Login/AnonymousBearer';
 import TimetableContainer from './src/TimetableContainer';
 import { setCustomText } from 'react-native-global-props';
 
@@ -49,10 +50,15 @@ export default class App extends Component {
                 <PersistGate
                     loading={<ActivityIndicator></ActivityIndicator>}
                     persistor={persistor}>
-
-                    <LoginBearer>
-                        <TimetableContainer />
-                    </LoginBearer>
+                    {APP ?
+                        <LoginBearer>
+                            <TimetableContainer />
+                        </LoginBearer>
+                        :
+                        <AnonymousBearer>
+                            <TimetableContainer />
+                        </AnonymousBearer>
+                    }
 
                 </PersistGate>
             </Provider>

@@ -38,20 +38,26 @@ const setCustomText = customProps => {
 };
 
 
-setCustomText({
-    style: {
-        fontFamily: Platform.OS === 'ios' ? 'HelveticaNeue' : Platform.OS === 'web' ? 'Roboto' : 'sans-serif-light',
-        color: 'black'
-    }
-});
-
+const fontAwesome = require('react-native-vector-icons/Fonts/MaterialIcons.ttf');
+// Web Mode only - generate required css
+const reactNativeVectorIconsRequiredStyles = '@font-face { src:url(' + fontAwesome + '); font-family: Material Icons; }';
+// create stylesheet
+const style = document.createElement('style');
+style.type = 'text/css';
+if (style.styleSheet) {
+    style.styleSheet.cssText = reactNativeVectorIconsRequiredStyles;
+} else {
+    style.appendChild(document.createTextNode(reactNativeVectorIconsRequiredStyles));
+}
+// inject stylesheet
+document.head.appendChild(style);
 
 const config = {
     key: 'root',
     storage,
     debug: true,
     version: 1,
-}
+};
 
 const reducer = persistCombineReducers(config, {
     auth: authReducer,
@@ -70,7 +76,7 @@ export default class App extends Component {
                     persistor={persistor}>
 
                     <LoginBearer>
-                        <TimetableContainer/>
+                        <TimetableContainer />
                     </LoginBearer>
                 </PersistGate>
             </Provider>

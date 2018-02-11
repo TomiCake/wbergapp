@@ -14,7 +14,6 @@ const babelLoaderConfiguration = {
     test: /\.js$/,
     // Add every directory that needs to be compiled by Babel during the build.
     include: [
-        path.resolve(appDirectory, 'index.web.js'),
         path.resolve(appDirectory, 'App.web.js'),
         path.resolve(appDirectory, 'src'),
         path.resolve(appDirectory, 'node_modules/react-native-uncompiled'),
@@ -22,9 +21,9 @@ const babelLoaderConfiguration = {
         path.resolve(appDirectory, 'node_modules/react-native-global-props'),
         path.resolve(appDirectory, 'node_modules/react-navigation'),
         path.resolve(appDirectory, 'node_modules/react-native-tab-view'),
-        path.resolve(appDirectory, 'node_modules/react-native-vector-icons'),
         path.resolve(appDirectory, 'node_modules/react-native-progress'),
         path.resolve(appDirectory, 'node_modules/react-native-calendars'),
+        path.resolve(appDirectory, 'node_modules/react-native-vector-icons'),
     ],
     use: {
         loader: 'babel-loader',
@@ -51,14 +50,20 @@ const imageLoaderConfiguration = {
     }
 };
 
+const fontLoaderConfiguration = {
+    test: /\.ttf$/,
+    loader: 'url-loader', // or directly file-loader
+    include: path.resolve(__dirname, '../node_modules/react-native-vector-icons')
+};
+
 module.exports = {
     // your web-specific entry file
-    entry: ['babel-polyfill', path.resolve(appDirectory, 'index.web.js')],
+    entry: ['babel-polyfill', path.resolve(appDirectory, 'index.js')],
 
     // configures where the build ends up
     output: {
         filename: 'bundle.web.js',
-        path: path.resolve(appDirectory, 'dist')
+        path: path.resolve('./')
     },
 
     // ...the rest of your config
@@ -66,7 +71,8 @@ module.exports = {
     module: {
         rules: [
             babelLoaderConfiguration,
-            imageLoaderConfiguration
+            imageLoaderConfiguration,
+            fontLoaderConfiguration
         ]
     },
 

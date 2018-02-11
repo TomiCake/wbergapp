@@ -13,7 +13,8 @@ import {
     KeyboardAvoidingView,
     TouchableWithoutFeedback,
     ScrollView,
-    ActivityIndicator
+    ActivityIndicator,
+    Platform
 } from 'react-native';
 
 import { connect } from 'react-redux';
@@ -61,79 +62,83 @@ export class LoginScreen extends Component {
     render() {
 
         return (
-            <View style={{ flex: 1 }}>
+            <View style={styles.flex}>
                 <Animated.Image
                     source={require('../../img/bg.jpg')}
                     style={styles.backgroundImage}
                 >
                 </Animated.Image>
-                {/* Dismissing keyboard manually */}
                 <KeyboardAvoidingView
-                    style={{ position: 'absolute', height: '100%', width: '100%', justifyContent: 'center' }}
+                    style={[styles.container, Platform.select({ web: { alignItems: 'center', flexDirection: 'row' } })]}
                     behavior="padding"
                     keyboardVerticalOffset={-100}>
                     <View
-                        style={styles.card}>
-                        <ScrollView>
+                        style={[styles.card, Platform.select({ web: styles.flex })]}>
+                        <ScrollView
+                            keyboardShouldPersistTaps="handled">
                             <View style={styles.cardHeader}>
+                                <Text style={{ fontSize: 24 }}>
+                                    Anmeldung
+                                </Text>
                                 <Image
                                     source={require('../../img/logo.png')}
                                     resizeMode="contain"
-                                    style={{ height: 80, marginBottom: 15 }}>
+                                    style={{ height: 35, width: '100%', marginBottom: 15 }}>
 
                                 </Image>
-                                <Text style={{ textAlign: 'center', marginBottom: 20 }}>
-                                    Schön, dass Du diese App verwendest.
-                                    </Text>
                             </View>
-                            <View style={{ flexDirection: 'row' }}>
-                                <TextInput
-                                    style={[styles.input, { flex: 1 }]}
-                                    placeholder="E-Mail"
-                                    returnKeyType="next"
-                                    keyboardType="email-address"
-                                    autoCapitalize="none"
-                                    autoCorrect={false}
-                                    value={this.state.email}
-                                    onFocus={() => this.setState({ error: null })}
-                                    onSubmitEditing={() => this.refs.passwordInput.focus()}
-                                    ref="emailInput"
-                                    onChangeText={(text) => this.setState({ email: text })}
-                                />
-                                <Text style={{ marginTop: 10 }}>@wgmail.de</Text>
-                            </View>
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Passwort"
-                                returnKeyType="go"
-                                secureTextEntry
-                                onFocus={() => this.setState({ error: null })}
-                                ref="passwordInput"
-                                onSubmitEditing={this.login.bind(this)}
-                                onChangeText={(text) => this.setState({ password: text })}
-                            />
-
-                            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                                <View style={{ flex: 1 }}>
-                                    <Button
-                                        onPress={this.login.bind(this)}
-                                        title="Login"
-                                        color="#3F51B5"
-                                        disabled={this.state.loggingIn}
+                            <View style={styles.cardContent}>
+                                <View style={styles.row}>
+                                    <TextInput
+                                        style={[styles.input, { flex: 1 }]}
+                                        placeholder="E-Mail"
+                                        returnKeyType="next"
+                                        keyboardType="email-address"
+                                        autoCapitalize="none"
+                                        autoCorrect={false}
+                                        value={this.state.email}
+                                        blurOnSubmit={false}
+                                        onFocus={() => this.setState({ error: null })}
+                                        onSubmitEditing={() => this.refs.passwordInput.focus()}
+                                        ref="emailInput"
+                                        onChangeText={(text) => this.setState({ email: text })}
                                     />
+                                    <Text style={{ marginTop: 10 }}>@wgmail.de</Text>
                                 </View>
-                                {this.state.loggingIn &&
-                                    <ActivityIndicator />}
-                            </View>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Passwort"
+                                    returnKeyType="go"
+                                    secureTextEntry
+                                    value={this.state.password}
+                                    onFocus={() => this.setState({ error: null })}
+                                    ref="passwordInput"
+                                    onSubmitEditing={this.login.bind(this)}
+                                    onChangeText={(text) => this.setState({ password: text })}
+                                />
 
-                            {this.state.error ?
-                                (<View style={styles.error}>
-                                    <Text style={{ color: 'red' }}>
-                                        {this.state.error}
-                                    </Text>
-                                </View>)
-                                : null
-                            }
+                                <View style={[styles.row, { justifyContent: 'space-between' }]}>
+                                    <View style={styles.flex}>
+                                        <Button
+                                            onPress={this.login.bind(this)}
+                                            title="Login"
+                                            color="#3F51B5"
+                                            disabled={this.state.loggingIn}
+                                        />
+                                    </View>
+                                    {this.state.loggingIn &&
+                                        <ActivityIndicator />}
+                                </View>
+
+                                {this.state.error ?
+                                    (<View style={styles.error}>
+                                        <Text style={{ color: 'red' }}>
+                                            {this.state.error}
+                                        </Text>
+                                    </View>)
+                                    : null
+                                }
+                            </View>
                         </ScrollView>
                     </View>
                 </KeyboardAvoidingView>

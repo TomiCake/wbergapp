@@ -13,19 +13,7 @@ export default class Grid extends Component {
     constructor(props) {
         super(props);
     }
-
-    // setLayout(x, y) {
-    //     return (layout) => {
-    //         this.cellPositions[x - 1][y - 1] = {
-    //             left: (x - 1) * layout.nativeEvent.layout.width + 40,
-    //             top: layout.nativeEvent.layout.y,
-    //             width: layout.nativeEvent.layout.width - 1,
-    //             height: layout.nativeEvent.layout.height - 1,
-    //         };
-    //         this.props.onLayout();
-    //     }
-    // }
-
+    
     renderColumn(i) {
         return (
             <View key={i} style={[styles.column]}>

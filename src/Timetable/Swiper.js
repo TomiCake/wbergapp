@@ -25,7 +25,7 @@ class Page extends Component {
 
         };
         if (this.props.right || this.props.left) {
-            const space = 100;
+            const space = 200;
             return (
                 <Animated.View style={[pageStyle, {
                     elevation: 0,
@@ -46,9 +46,6 @@ class Page extends Component {
                 </Animated.View>
             );
         }
-
-
-
         return (
             <Animated.View style={[pageStyle, {
                 elevation: 1,
@@ -76,6 +73,10 @@ class PromisePage extends Page {
     constructor(props) {
         super(props);
         this.props.page.page.update = this.loadRender.bind(this);
+        this.state = {
+            grayOut: new Animated.Value(1),
+        }
+
     }
 
     loadRender(force) {
@@ -85,11 +86,21 @@ class PromisePage extends Page {
             }
             return;
         }
-        return this.promise = this.props.renderContent(this.props.page.page)
+        if (this.props.slaves) {
+            Animated.timing(this.state.grayOut, {
+                toValue: 0,
+                useNativeDriver: true
+            }).start();
+        }
+        return this.promise = this.props.renderContent(this.props.page.page, this.state.grayOut)
             .then((rendered) => {
                 this.children = rendered;
                 this.promise = null;
-                this.forceUpdate();
+                this.forceUpdate(() =>
+                    Animated.timing(this.state.grayOut, {
+                        toValue: 1,
+                        useNativeDriver: true
+                    }).start());
                 console.log("rendered" + this.props.page.page.index);
                 if (this.props.slaves) {
                     this.props.slaves.forEach((slave) => slave && slave.update(force));
@@ -136,7 +147,7 @@ export default class Swiper extends Component {
             onPanResponderMove: (evt, gestureState) => {
                 if (this.locked) return false;
                 if (Math.abs(gestureState.dx) >= 150 / Math.max(1, Math.abs(gestureState.vx * 0.7))
-                    && this.canChangePage(gestureState.dx)) {
+                    && this.canChangePage(gestureState.dx > 0 ? 1 : -1)) {
                     //this.changePage(gestureState.dx);
                     this.animate(gestureState.dx > 0 ? 1 : -1);
                     return false;
@@ -181,7 +192,8 @@ export default class Swiper extends Component {
     masterPage;
 
     canChangePage(dx) {
-        return dx > 0 ? this.index > this.props.minIndex : this.index < this.props.maxIndex;
+        let index = this.index - dx;
+        return index >= this.props.minIndex && index <= this.props.maxIndex;
     }
 
     updateDate(diff) {
@@ -189,6 +201,10 @@ export default class Swiper extends Component {
     }
 
     animate(diff) {
+        if (!this.canChangePage(diff)) {
+            return;
+        }
+        this.changePage(diff);
         this.locked = true;
         if (this.anim) {
             this.anim.stop();
@@ -201,18 +217,18 @@ export default class Swiper extends Component {
         this.anim.start(() => {
             if (anim === this.anim) {
                 this.state.x.setValue(0);
-                this.changePage(-diff);
+                this.forceUpdate(() => this.masterPage.update());
                 this.anim = null;
             }
         });
     }
 
     changePage(dx, callback) {
-        this.index += dx;
+        this.index -= dx;
         this.setIndex(this.index);
-        this.forceUpdate(() => this.masterPage.update());
+
     }
-    // this.props.date + this.index
+
     setIndex(index) {
         let newPages = [];
         for (i = Math.max(index - 1, this.props.minIndex); i <= Math.min(index + 1, this.props.maxIndex); i++) {
@@ -260,7 +276,7 @@ export default class Swiper extends Component {
                 </View>
                 <View
                     style={{ flex: 1 }}
-                    {...(this.panResponder.panHandlers || {})}
+                    {...(this.panResponder.panHandlers || {}) }
                 >
                     {left &&
                         <PromisePage x={this.state.x} left key={left.index} page={{ page: left }} renderContent={renderContent} />

@@ -2,12 +2,13 @@ import React, { Component } from 'react';
 import { Animated, ActivityIndicator, View, Text, Button } from 'react-native';
 import styles from './styles';
 import { connect } from 'react-redux';
-import { getMasterdata, getTimetable, getSubstitutions } from './api';
+import { getMasterdata, getTimetable, getSubstitutions, getSubstitutionsAll } from './api';
 import Timetable from '../Timetable';
 import AppBar from './AppBar';
 import moment from 'moment';
 import SearchView from '../SearchView';
 import CalendarModal from './CalendarModal';
+import SubstitutionView from '../SubstitutionView';
 
 class TimetableView extends Component {
 
@@ -64,7 +65,7 @@ class TimetableView extends Component {
 
     closeCalendar(date) {
         let d = moment(date.dateString).isoWeekday(1);
-        this.setState({ calendarModal: false, date: d});
+        this.setState({ calendarModal: false, date: d });
         console.log(d, this.state.date);
     }
 
@@ -77,7 +78,8 @@ class TimetableView extends Component {
                 console.log("reloaded masterdata");
                 this.props.setMasterdata(masterdata);
             }
-            this.setState({ loading: null });
+            let substitutions = await getSubstitutionsAll(this.props.token, '2018', '8');
+            this.setState({ loading: null, substitutions });
         } catch (error) {
             if (error.status === 'token_error') {
                 this.props.resetToken();
@@ -112,15 +114,33 @@ class TimetableView extends Component {
                             <Text style={styles.error}>{this.state.error}</Text>
                             <Button title="Retry" onPress={() => this.loadData()} />
                         </View> :
-                        <Timetable
-                            date={this.state.date}
-                            loadFor={this.loadForTimetable}
-                            masterdata={this.props.masterdata}
-                            type={this.state.type}
-                            id={this.state.id}
-                            onError={(error) => this.setState({ error: error.message })}
-                        >
-                        </Timetable>
+                        APP ?
+                            <Timetable
+                                date={this.state.date}
+                                loadFor={this.loadForTimetable}
+                                masterdata={this.props.masterdata}
+                                type={this.state.type}
+                                id={this.state.id}
+                                onError={(error) => this.setState({ error: error.message })}
+                            >
+                            </Timetable>
+                            :
+                            <View style={[styles.container, styles.row]}>
+                                <SubstitutionView
+                                    substitutions={this.state.substitutions}
+                                    masterdata={this.props.masterdata}
+                                    day={4}
+                                />
+                                <Timetable
+                                    date={this.state.date}
+                                    loadFor={this.loadForTimetable}
+                                    masterdata={this.props.masterdata}
+                                    type={this.state.type}
+                                    id={this.state.id}
+                                    onError={(error) => this.setState({ error: error.message })}
+                                >
+                                </Timetable>
+                            </View>
                     }
                 </View>
                 <CalendarModal visible={this.state.calendarModal} date={this.state.date} selectDate={this.closeCalendar.bind(this)} />

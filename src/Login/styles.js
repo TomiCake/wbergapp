@@ -3,19 +3,23 @@ import { StyleSheet } from 'react-native';
 const styles = StyleSheet.create({
     error: {
         marginTop: 10,
-        // marginVertical: 20,
-        // backgroundColor: 'red',
-        // padding: 20,
+    },
+    container: {
+        position: 'absolute', height: '100%', width: '100%',
+        justifyContent: 'center',
     },
     cardHeader: {
-        alignItems: 'center'
+        alignItems: 'center',
+        flexDirection: 'row',
+        padding: 16,
+    },
+    cardContent: {
+        padding: 20,
     },
     card: {
-        backgroundColor: '#FFFFFFE0',
-        padding: 20,
-        
+        backgroundColor: '#FFFFFFEF',
         margin: 20,
-        borderRadius: 5,
+        borderRadius: 2,
         shadowColor: "#000",
         shadowOffset: {
             width: 0,
@@ -23,12 +27,19 @@ const styles = StyleSheet.create({
         },
         shadowOpacity: 1,
         shadowRadius: 16.00,
-
-        elevation: 12,
+ 
+        elevation: 1,
+        maxWidth: 500,
     },
     title: {
         fontSize: 38,
         backgroundColor: 'transparent'
+    },
+    flex: {
+        flex: 1
+    },
+    row: {
+        flexDirection: 'row',
     },
     input: {
         height: 40,
@@ -37,10 +48,6 @@ const styles = StyleSheet.create({
     },
     button: {
         marginRight: 10
-    },
-    container: {
-        flex: 1,
-        justifyContent: 'center'
     },
     backgroundImage: {
         justifyContent: 'center',

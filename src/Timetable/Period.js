@@ -33,7 +33,7 @@ function PeriodText(props) {
 
 function renderLesson(type, lesson, i, horizontal, small) {
     Object.keys(lesson).forEach((key) => {
-        if (typeof lesson[key] === 'object') {
+        if (typeof lesson[key] === 'object' && !Array.isArray(lesson[key])) {
             lesson[key] = { ...lesson[key] }
         }
     });
@@ -43,7 +43,7 @@ function renderLesson(type, lesson, i, horizontal, small) {
             return { NAME: "???", DESCRIPTION: "???" };
         }
         if (elem instanceof Array) {
-            let joined = elem.map((e) => e.NAME).join('|');
+            let joined = elem.join('|');
             return { NAME: joined, DESCRIPTION: joined };
         }
         return elem;

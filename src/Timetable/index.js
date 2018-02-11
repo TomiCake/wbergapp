@@ -1,13 +1,14 @@
 import React, { Component } from 'react';
 import styles from './styles';
 import PropTypes from 'prop-types';
-import { View, Text, ActivityIndicator, Animated, Platform} from 'react-native';
+import { View, Text, ActivityIndicator, Animated, Platform } from 'react-native';
 import moment from 'moment';
 import Grid from './Grid';
 import Period from './Period';
 import { PERIOD_NUMBERS, WEEKDAY_NAMES, PERIOD_BGCOLOR, HOLIDAY_BGCOLOR } from '../const';
 import Swiper from './Swiper';
 import GridBox from './GridBox';
+import { Icon } from 'react-native-elements';
 
 export default class Timetable extends Component {
     static propTypes = {
@@ -182,76 +183,87 @@ export default class Timetable extends Component {
         return data;
     }
 
-    renderWeek = async (page) => {
-        let content = await this.loadWeek(page.date);
-        let components = [];
-        for (let x = 0; x < WEEKDAY_NAMES.length; x++) {
-            let rows = [];
-            let day = content[x];
-            if (day.holiday) {
-                rows.push(
-                    <GridBox
-                        key={0}
-                        backgroundColor={HOLIDAY_BGCOLOR}
-                        renderContent={(horizontal) => (
-                            <Text style={styles.holiday}>{day.holiday}</Text>
-                        )}
-                    />
-                )
-            }
-            if (day.periods) {
-                for (let y = 0; y < PERIOD_NUMBERS.length; y++) {
-                    let period = day.periods[y];
-                    if (!period || !period.lessons) {
-                        rows.push(
-                            <View
-                                key={x * WEEKDAY_NAMES.length + y}
-                                style={styles.container}>
-
-                            </View>
-                        );
-                    } else {
-                        rows.push(
-                            <View
-                                key={x * WEEKDAY_NAMES.length + y}
-                                style={[styles.container, { flex: period.skip + 1 }]}>
-                                <GridBox
+    renderWeek = async (page, grayOut) => {
+        try {
+            let content = await this.loadWeek(page.date);
+            let components = [];
+            for (let x = 0; x < WEEKDAY_NAMES.length; x++) {
+                let rows = [];
+                let day = content[x];
+                if (day.holiday) {
+                    rows.push(
+                        <GridBox
+                            key={0}
+                            backgroundColor={HOLIDAY_BGCOLOR}
+                            opacity={grayOut}
+                            renderContent={(horizontal) => (
+                                <Text style={styles.holiday}>{day.holiday}</Text>
+                            )}
+                        />
+                    )
+                }
+                if (day.periods) {
+                    for (let y = 0; y < PERIOD_NUMBERS.length; y++) {
+                        let period = day.periods[y];
+                        if (!period || !period.lessons) {
+                            rows.push(
+                                <View
                                     key={x * WEEKDAY_NAMES.length + y}
-                                    backgroundColor={PERIOD_BGCOLOR}
-                                    renderContent={(horizontal) =>
-                                        <Period
-                                            type={this.props.type}
-                                            data={period.lessons}
-                                            horizontal={horizontal}
-                                        />}
-                                />
-                            </View>
-                        );
-                        y += period.skip;
+                                    style={styles.container}>
+
+                                </View>
+                            );
+                        } else {
+                            rows.push(
+                                <View
+                                    key={x * WEEKDAY_NAMES.length + y}
+                                    style={[styles.container, { flex: period.skip + 1 }]}>
+                                    <GridBox
+                                        key={x * WEEKDAY_NAMES.length + y}
+                                        backgroundColor={PERIOD_BGCOLOR}
+                                        opacity={grayOut}
+                                        renderContent={(horizontal) =>
+                                            <Period
+                                                type={this.props.type}
+                                                data={period.lessons}
+                                                horizontal={horizontal}
+                                            />}
+                                    />
+                                </View>
+                            );
+                            y += period.skip;
+                        }
                     }
                 }
+                components.push(
+                    <View
+                        key={x}
+                        style={styles.column}>
+                        {rows}
+                    </View>
+                );
             }
-            components.push(
-                <View
-                    key={x}
-                    style={styles.column}>
-                    {rows}
+            return (
+                <View style={styles.container}>
+                    <View style={[styles.container, styles.row]}>
+                        {components}
+                    </View>
                 </View>
             );
+        } catch (err) {
+            console.error(err);
+            return null;
         }
-        return (
-            <View style={styles.container}>
-                <View style={[styles.container, styles.row]}>
-                    {components}
-                </View>
-            </View>
-        );
     }
     render() {
 
         return (
             <View style={[styles.container, this.props.style]}>
                 <View style={styles.container}>
+                    <View style={{flexDirection: 'row'}}>
+                        <Icon name="navigate-before" onPress={() => this.refs.grid.updateDate(1)}/>
+                        <Icon name="navigate-next" onPress={() => this.refs.grid.updateDate(-1)}/>
+                    </View>
                     <Grid
                         ref="grid"
                         monday={moment().isoWeekday(1)}

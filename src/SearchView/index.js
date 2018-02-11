@@ -8,25 +8,27 @@ import { Icon } from 'react-native-elements';
 import AppBar from './AppBar';
 
 class ListItem extends Component {
-    render() { return (
-        <View style={styles.listItem}>
-            <View style={styles.listItemNameType}>
-                <Text style={styles.listItemName}>
-                    {this.props.item.name}
-                </Text>
-                <Text style={styles.listItemType}>
-                    {this.props.item.typeName}
-                </Text>
+    render() {
+        return (
+            <View style={styles.listItem}>
+                <View style={styles.listItemNameType}>
+                    <Text style={styles.listItemName}>
+                        {this.props.item.name}
+                    </Text>
+                    <Text style={styles.listItemType}>
+                        {this.props.item.typeName}
+                    </Text>
+                </View>
+                <Icon
+                    iconStyle={styles.button}
+                    name='chevron-right'
+                    color="#333333"
+                    reverse
+                    size={15}
+                    onPress={() => this.props.select(this.props.item.id, this.props.item.type)} />
             </View>
-            <Icon
-                iconStyle={styles.button}
-                name = 'chevron-right'
-                color = "#333333"
-                reverse
-                size = {15}
-                onPress={() => this.props.select(this.props.item.id, this.props.item.type)} />
-        </View>
-    )}
+        )
+    }
 };
 
 class SearchView extends Component {
@@ -37,40 +39,40 @@ class SearchView extends Component {
         }
     }
 
-    filterData (filter) {
+    filterData(filter) {
         const masterdata = this.props.masterdata;
-        const data = 
-            ['Teacher', 'Class', 'Room', 'Student'].reduce((result,type,i) =>
-               [...result,   
+        const data =
+            ['Teacher', 'Class', 'Room', 'Student'].reduce((result, type, i) =>
+                [...result,
                 ...Object.keys(masterdata[type]).map((key) => ({
-                    name: (i == 1 || i==2) ?
-                        masterdata[type][key].NAME: 
-                        masterdata[type][key].LASTNAME + ", " +  masterdata[type][key].FIRSTNAME,
-                    filtername: masterdata[type][key].NAME + " " + masterdata[type][key].LASTNAME + " " +  masterdata[type][key].FIRSTNAME +  " " + masterdata[type][key].LASTNAME,
+                    name: (i == 1 || i == 2) ?
+                        masterdata[type][key].NAME :
+                        masterdata[type][key].LASTNAME + ", " + masterdata[type][key].FIRSTNAME,
+                    filtername: masterdata[type][key].NAME + " " + masterdata[type][key].LASTNAME + " " + masterdata[type][key].FIRSTNAME + " " + masterdata[type][key].LASTNAME,
                     typeName: ["Lehrer", "Klassen", "Räume", "Schüler"][i],
                     type: type.toLowerCase(),
                     id: key
                 }))
                 ]
-        , []);
+                , []);
         return !filter ? data : data.filter((item) => {
             return new RegExp(`${filter}`, "gi").test(item.filtername)
         });
     }
 
     componentDidMount() {
-        this.props.navigation.setParams({onChangeText: this.onChangeText});
+        this.props.navigation.setParams({ onChangeText: this.onChangeText });
     }
 
-    static navigationOptions = ({ navigation }) =>({
-        header: <AppBar goBack = {navigation.goBack} onChangeText = {navigation.state.params && navigation.state.params.onChangeText}/>,
+    static navigationOptions = ({ navigation }) => ({
+        header: <AppBar goBack={navigation.goBack} onChangeText={navigation.state.params && navigation.state.params.onChangeText} />,
     });
 
     onChangeText = (text) => {
         this.setState({ data: this.filterData(text) });
     }
 
-    select (id, type) {
+    select(id, type) {
         this.props.navigation.goBack();
         this.props.navigation.state.params.onSelect(id, type);
         Keyboard.dismiss();
@@ -80,10 +82,10 @@ class SearchView extends Component {
         return (
             <FlatList
                 keyboardShouldPersistTaps={'handled'}
-                renderItem={({item}) => <ListItem item={item} select={(id, type) => {this.select(id, type)}}/>}
-                keyExtractor = {(item, index) => `${item.type}-${item.id}`}
+                renderItem={({ item }) => <ListItem item={item} select={(id, type) => { this.select(id, type) }} />}
+                keyExtractor={(item, index) => `${item.type}-${item.id}`}
                 data={this.state.data}
-                />
+            />
         );
     }
 }
