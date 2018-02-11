@@ -1,7 +1,7 @@
 
 import React, { Component } from 'react';
 import { DATES_HEIGHT } from '../const';
-import { View, PanResponder, Animated, Dimensions } from 'react-native';
+import { View, PanResponder, Animated, Dimensions, Easing } from 'react-native';
 
 
 
@@ -82,7 +82,7 @@ class PromisePage extends Page {
     loadRender(force) {
         if (this.promise || !force && this.children) {
             if (this.props.slaves) {
-                this.props.slaves.forEach((slave) => slave && slave.update(force));
+                this.props.slaves.forEach((slave) => slave && slave.update && slave.update(force));
             }
             return;
         }
@@ -103,7 +103,7 @@ class PromisePage extends Page {
                     }).start());
                 console.log("rendered" + this.props.page.page.index);
                 if (this.props.slaves) {
-                    this.props.slaves.forEach((slave) => slave && slave.update(force));
+                    this.props.slaves.forEach((slave) => slave && slave.update && slave.update(force));
                 }
             });
     }
@@ -207,17 +207,18 @@ export default class Swiper extends Component {
         this.changePage(diff);
         this.locked = true;
         if (this.anim) {
-            this.anim.stop();
+            return;
         }
-        const anim = this.anim = Animated.spring(this.state.x, {
+        const anim = this.anim = Animated.timing(this.state.x, {
             toValue: diff * 2,
-            useNativeDriver: true
+            useNativeDriver: true,
+            easing: Easing.bezier(.42, 0, .58, 1)
         });
 
         this.anim.start(() => {
             if (anim === this.anim) {
                 this.state.x.setValue(0);
-                this.forceUpdate(() => this.masterPage.update());
+                this.forceUpdate(() => this.masterPage.update && this.masterPage.update());
                 this.anim = null;
             }
         });

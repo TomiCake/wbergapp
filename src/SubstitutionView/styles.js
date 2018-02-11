@@ -35,6 +35,32 @@ export default StyleSheet.create({
     },
     holidayText: {
         color: 'lime',
-        
-    }
+    },
+    row: {
+        flexDirection: 'row',
+    },
+    header: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: 40,
+        backgroundColor: '#1976D2',
+        elevation: 3,
+    },
+    headerText: {
+        color: 'white',
+        textAlign: 'center',
+        fontSize: 20,
+    },
+    dateText: {
+        color: 'white',
+        textAlign: 'right',
+        fontSize: 12,
+    },
+    container: {
+        flex: 1,
+        justifyContent: 'center',
+    },
+    flex: {
+        flex: 1,
+    },
 });

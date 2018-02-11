@@ -1,4 +1,4 @@
-global.APP = false;
+global.APP = true;
 
 import { AppRegistry } from 'react-native';
 import App from './App';

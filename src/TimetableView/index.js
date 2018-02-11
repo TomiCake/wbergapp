@@ -18,7 +18,7 @@ class TimetableView extends Component {
             error: null,
             myTimetable: null,
             calendarModal: false,
-            date: moment().isoWeekday(1).startOf('day'),
+            date: moment(),
             id: this.props.id.id,
             type: this.props.id.type,
         };
@@ -78,7 +78,7 @@ class TimetableView extends Component {
                 console.log("reloaded masterdata");
                 this.props.setMasterdata(masterdata);
             }
-            let substitutions = await getSubstitutionsAll(this.props.token, '2018', '8');
+            let substitutions = await getSubstitutionsAll(this.props.token, this.state.date.year(), this.state.date.week());
             this.setState({ loading: null, substitutions });
         } catch (error) {
             if (error.status === 'token_error') {
@@ -116,7 +116,7 @@ class TimetableView extends Component {
                         </View> :
                         APP ?
                             <Timetable
-                                date={this.state.date}
+                                date={this.state.date.isoWeekday(1).startOf('day')}
                                 loadFor={this.loadForTimetable}
                                 masterdata={this.props.masterdata}
                                 type={this.state.type}
@@ -129,17 +129,8 @@ class TimetableView extends Component {
                                 <SubstitutionView
                                     substitutions={this.state.substitutions}
                                     masterdata={this.props.masterdata}
-                                    day={4}
-                                />
-                                <Timetable
                                     date={this.state.date}
-                                    loadFor={this.loadForTimetable}
-                                    masterdata={this.props.masterdata}
-                                    type={this.state.type}
-                                    id={this.state.id}
-                                    onError={(error) => this.setState({ error: error.message })}
-                                >
-                                </Timetable>
+                                />
                             </View>
                     }
                 </View>

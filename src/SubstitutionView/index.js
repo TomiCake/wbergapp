@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { ScrollView, View, Text } from 'react-native';
-
+import Header from './Header';
 import styles from './styles';
 
 const colorMap = {
@@ -95,10 +95,11 @@ export default class SubstitutionView extends Component {
 
     parse(props) {
         let data = {};
-        let day = props.day;
+        let day = props.date.isoWeekday();
+        if (day > 5) return null;
         let masterdata = props.masterdata;
         let subs = props.substitutions[day];
-        console.log(subs);
+        if (!subs) return null;
         subs.substitutions.forEach((substitution) => {
             let entry = data[substitution.CLASS_IDS];
             if (!entry) {
@@ -129,6 +130,7 @@ export default class SubstitutionView extends Component {
     render() {
         return (
             <View style={styles.container}>
+                <Header date={this.props.date}/>    
                 <ScrollView style={styles.table}>
                     {this.state.data && this.state.data.map((substitution, i) => (
                         <SubstitutionEntry

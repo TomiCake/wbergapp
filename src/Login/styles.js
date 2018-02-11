@@ -31,10 +31,6 @@ const styles = StyleSheet.create({
         elevation: 1,
         maxWidth: 500,
     },
-    title: {
-        fontSize: 38,
-        backgroundColor: 'transparent'
-    },
     flex: {
         flex: 1
     },
