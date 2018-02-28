@@ -72,17 +72,17 @@ function renderLesson(type, lesson, i, horizontal, small) {
     let period;
     if (!horizontal && small) {
         period = (
-            <View style={[styles.row, styles.flex]}>
+            <View style={[styles.row]}>
                 <PeriodText style={fields[0].style} bold nowrap>{fields[0].NAME}</PeriodText>
-                <View>
-                    <PeriodText style={fields[1].style} small right>{fields[1].NAME}</PeriodText>
+                <View style={[styles.column, styles.flex]}>
+                    <PeriodText style={fields[1].style} small right nowrap>{fields[1].DESCRIPTION}</PeriodText>
                     <PeriodText style={fields[2].style} small right>{fields[2].NAME}</PeriodText>
                 </View>
             </View>
         );
     } else if (!horizontal && !small) {
         period = (
-            <View style={[styles.column, styles.flex]}>
+            <View style={[styles.column]}>
                 <View style={[styles.row, styles.flex]}>
                     <PeriodText style={fields[0].style} bold nowrap>{fields[0].NAME}</PeriodText>
                     <PeriodText style={fields[2].style} right>{fields[2].NAME}</PeriodText>
@@ -97,14 +97,12 @@ function renderLesson(type, lesson, i, horizontal, small) {
                     <PeriodText style={fields[0].style} nowrap bold ellipsizeMode="middle">{fields[0].DESCRIPTION}</PeriodText>
                     <PeriodText style={fields[1].style} small>{fields[1].DESCRIPTION}</PeriodText>
                 </View>
-                <View>
-                    <PeriodText style={fields[2].style} right>{fields[2].NAME}</PeriodText>
-                </View>
+                <PeriodText style={fields[2].style} right>{fields[2].NAME}</PeriodText>
             </View>
         );
     }
     return (
-        <View key={i} style={styles.column}>
+        <View key={i} style={[styles.column, styles.flex]}>
             {lesson.substitutionType &&
                 <PeriodText style={{ color: style && style.color || 'white' }} bold>{lesson.substitutionText || style && style.type}</PeriodText>
             }

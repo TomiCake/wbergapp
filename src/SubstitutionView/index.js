@@ -16,12 +16,9 @@ function SubstitutionEntry(props) {
                     };
                     return (
                         <View key={i} style={styles.row}>
-                            <View>
-                                <Text style={[styles.substitutionText, textStyle]}>
-                                    {substitution.period}
-                                </Text>
-                            </View>
-
+                            <Text style={[styles.substitutionText, textStyle]}>
+                                {substitution.period}
+                            </Text>
                             <View style={[styles.row, styles.flex]}>
                                 <View style={styles.flex}>
                                     <Text style={[styles.substitutionText, textStyle]}>
@@ -94,7 +91,7 @@ export default class SubstitutionView extends Component {
 
     translate(masterdata, substitution) {
         return {
-            period: substitution.PERIOD -1,
+            period: substitution.PERIOD - 1,
             text: substitution.TEXT,
             substitutionType: substitution.TYPE,
             teacher: masterdata.Teacher[substitution.TEACHER_ID],
@@ -109,7 +106,7 @@ export default class SubstitutionView extends Component {
     render() {
         return (
             <View style={styles.container}>
-                <Header date={this.props.date}/>    
+                <Header date={this.props.date} />
                 <ScrollView style={styles.table}>
                     {this.state.data && this.state.data.map((substitution, i) => (
                         <SubstitutionEntry

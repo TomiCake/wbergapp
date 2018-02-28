@@ -21,7 +21,6 @@ class Page extends Component {
             left: 0,
             height: '100%',
             width: '100%',
-
         };
         if (this.props.right || this.props.left) {
             const space = 200;
@@ -278,7 +277,8 @@ export default class Swiper extends Component {
         return (
             <View
                 style={{
-                    position: 'absolute', height: '100%', width: '100%'
+                    position: 'absolute', height: '100%', width: '100%',
+                    backgroundColor: 'transparent'
                 }}
                 {...(this.panResponder.panHandlers || {})}
                 pointerEvents="auto"

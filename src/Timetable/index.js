@@ -139,17 +139,20 @@ export default class Timetable extends Component {
             if (current.lessons) {
                 for (let i = 0; i < current.lessons.length; i++) {
                     let last = current.lessons[i];
-                    for (let j = i+1; j < current.lessons.length; j++) {
+                    for (let j = i + 1; j < current.lessons.length; j++) {
                         let lesson = current.lessons[j];
-                        if (lesson.ROOM_ID === last.ROOM_ID && lesson.SUBJECT_ID === last.SUBJECT_ID) {
+                        if (lesson.ROOM_ID === last.ROOM_ID
+                            && lesson.SUBJECT_ID === last.SUBJECT_ID
+                            && lesson.substitutionType === last.substitutionType) {
                             if (!last.TEACHER_IDS) {
+                                last = current.lessons[i] = { ...last };
                                 last.TEACHER_IDS = [last.TEACHER_ID];
                                 last.TEACHER_ID = undefined;
                             }
                             last.TEACHER_IDS.push(lesson.TEACHER_ID);
                             current.lessons.splice(j);
                         }
-                    }    
+                    }
                 }
             }
         }
@@ -245,7 +248,6 @@ export default class Timetable extends Component {
                                 <View
                                     key={x * WEEKDAY_NAMES.length + y}
                                     style={styles.container}>
-
                                 </View>
                             );
                         } else {
@@ -283,10 +285,8 @@ export default class Timetable extends Component {
                 );
             }
             return (
-                <Animated.View style={[styles.container, { opacity: grayOut }]}>
-                    <View style={[styles.container, styles.row]}>
-                        {components}
-                    </View>
+                <Animated.View style={[styles.container, { opacity: grayOut }, styles.row]}>
+                    {components}
                 </Animated.View>
             );
         } catch (err) {

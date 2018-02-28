@@ -28,7 +28,7 @@ export default class Grid extends Component {
 
     renderColumn(i) {
         return (
-            <View key={i} style={[styles.column]}>
+            <View key={i} style={[styles.container, styles.column]}>
                 {this.renderHeaderSpacing()}
                 {PERIOD_NUMBERS.map((y) => this.renderCell(i, y))}
             </View>
@@ -106,7 +106,7 @@ export default class Grid extends Component {
             <View style={[styles.container, styles.grid]}>
                 {this.renderHeaderColumn(0)}
                 <View style={styles.grid}>
-                    {[1, 2, 3, 4, 5].map((i) => this.renderColumn(i))}
+                    {WEEKDAY_NAMES.map((name, i) => this.renderColumn(i))}
                     <Swiper
                         ref="swiper"
                         renderContent={this.props.renderWeek}
