@@ -1,3 +1,6 @@
+import { checkStatus } from "./apiHelper";
+import { API_URL } from "../const";
+
 const BREAKS = [
     { period: 3, time: 15 },
     { period: 5, secondaryPeriod: 6, time: 20 },
@@ -32,4 +35,20 @@ export function getPeriodTimes(period, secondary) {
     date.setMinutes(date.getMinutes() + 45); // end of period
     r.end = formatDate(date);
     return r;
+}
+
+export function getPeriodTimesOnline(token) {
+    return fetch(`${API_URL}/period-times`, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        }
+    })
+        .then(checkStatus)
+        .then((response) => response.json())
+        .catch(async (error) => {
+            throw await error.response.json();
+        });
 }

@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 
 import { View, Text, ScrollView, Animated, TouchableWithoutFeedback, TouchableOpacity, TouchableNativeFeedback, TouchableHighlight, Dimensions } from 'react-native';
 import styles from './period.styles';
+import { SUBSTITUTION_MAP } from '../const';
 
 const templates = {
     "student": ["subject", "teacher", "room"],
@@ -43,24 +44,35 @@ function renderLesson(type, lesson, i, horizontal, small) {
             return { NAME: "???", DESCRIPTION: "???" };
         }
         if (elem instanceof Array) {
-            let joined = elem.join('|');
-            return { NAME: joined, DESCRIPTION: joined };
+            let joinedName = elem.map(e=> e.NAME).join(', ');
+            let joinedDescription = elem.map(e => e.DESCRIPTION || e.NAME).join(', ');
+            return { NAME: joinedName, DESCRIPTION: joinedDescription };
         }
         return elem;
     });
-    switch (lesson.substitutionType) {
-        case "SUBSTITUTION": fields.forEach((e) => e.style = { color: 'red' }); break;
-        case "ASSIGNMENT": fields.forEach((e) => e.style = { color: 'yellow' }); break;
-        case "ROOM_SUBSTITUTION": lesson.room.style = { color: 'cyan' }; break;
-        case "EXTRA_LESSON": fields.forEach((e) => e.style = { color: 'red' }); break;
-        case "ELIMINATION": fields.forEach((e) => e.style = {color: 'green'}); break;    
+    let style = SUBSTITUTION_MAP[lesson.substitutionType];
+    if (style) {
+        if (style.targets) {
+            style.targets.forEach((key) => {
+                lesson[key].style = { color: style.color };
+            })
+        } else {
+            fields.forEach((e) => e.style = { color: style.color });
+        }
+    }
+    if (lesson.substitutionRemove) {
+        fields.forEach((e) => e.style = {
+            ...e.style,
+            fontSize: 8,
+            textDecorationLine: 'line-through',
+            color: 'grey'
+        });
     }
 
-
-
+    let period;
     if (!horizontal && small) {
-        return (
-            <View key={i} style={styles.row}>
+        period = (
+            <View style={[styles.row, styles.flex]}>
                 <PeriodText style={fields[0].style} bold nowrap>{fields[0].NAME}</PeriodText>
                 <View>
                     <PeriodText style={fields[1].style} small right>{fields[1].NAME}</PeriodText>
@@ -68,21 +80,19 @@ function renderLesson(type, lesson, i, horizontal, small) {
                 </View>
             </View>
         );
-    }
-    if (!horizontal && !small) {
-        return (
-            <View key={i} style={styles.column}>
+    } else if (!horizontal && !small) {
+        period = (
+            <View style={[styles.column, styles.flex]}>
                 <View style={[styles.row, styles.flex]}>
-                    <PeriodText style={fields[0].style} bold nowrap >{fields[0].NAME}</PeriodText>
+                    <PeriodText style={fields[0].style} bold nowrap>{fields[0].NAME}</PeriodText>
                     <PeriodText style={fields[2].style} right>{fields[2].NAME}</PeriodText>
                 </View>
-                <PeriodText style={fields[1].style} nowrap middle>{fields[1].DESCRIPTION}</PeriodText>
+                <PeriodText style={fields[1].style} middle>{fields[1].DESCRIPTION}</PeriodText>
             </View>
         );
-    }
-    if (horizontal) {
-        return (
-            <View key={i} style={styles.row}>
+    } else if (horizontal) {
+        period = (
+            <View style={styles.row}>
                 <View style={[styles.column, styles.flex]}>
                     <PeriodText style={fields[0].style} nowrap bold ellipsizeMode="middle">{fields[0].DESCRIPTION}</PeriodText>
                     <PeriodText style={fields[1].style} small>{fields[1].DESCRIPTION}</PeriodText>
@@ -93,11 +103,20 @@ function renderLesson(type, lesson, i, horizontal, small) {
             </View>
         );
     }
+    return (
+        <View key={i} style={styles.column}>
+            {lesson.substitutionType &&
+                <PeriodText style={{ color: style && style.color || 'white' }} bold>{lesson.substitutionText || style && style.type}</PeriodText>
+            }
+            {period}
+        </View>
+    )
+
 }
 export default (props) => (
-    <View style={{ flex: 1 }}>
+    <View>
         {props.data.map((lesson, i) => (
-            renderLesson(props.type, lesson, i, props.horizontal, props.data.length > 1)
+            renderLesson(props.type, lesson, i, props.horizontal || props.opened, props.data.length > 1)
         ))}
     </View>
 )

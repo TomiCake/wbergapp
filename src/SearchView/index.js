@@ -1,35 +1,35 @@
 import React, { Component } from 'react';
 
-import { FlatList, View, Text, TouchableNativeFeedback, Keyboard } from 'react-native';
+import { FlatList, View, Text, Keyboard } from 'react-native';
 import { connect } from 'react-redux';
 
 import styles from './styles';
-import { Icon } from 'react-native-elements';
+import Icon from '../components/Icon';
 import AppBar from './AppBar';
+import Touchable from '../components/Touchable';
 
-class ListItem extends Component {
-    render() {
-        return (
-            <View style={styles.listItem}>
-                <View style={styles.listItemNameType}>
-                    <Text style={styles.listItemName}>
-                        {this.props.item.name}
-                    </Text>
-                    <Text style={styles.listItemType}>
-                        {this.props.item.typeName}
-                    </Text>
-                </View>
-                <Icon
-                    iconStyle={styles.button}
-                    name='chevron-right'
-                    color="#333333"
-                    reverse
-                    size={15}
-                    onPress={() => this.props.select(this.props.item.id, this.props.item.type)} />
+const ListItem = (props) => (
+    <Touchable
+        onPress={() => props.select(props.item.id, props.item.type)}>
+        <View style={styles.listItem}>
+            <View style={styles.listItemNameType}>
+                <Text style={styles.listItemName}>
+                    {props.item.name}
+                </Text>
+                <Text style={styles.listItemType}>
+                    {props.item.typeName}
+                </Text>
             </View>
-        )
-    }
-};
+            <Icon
+                iconStyle={styles.button}
+                name='chevron-right'
+                color="#333333"
+                reverse
+                size={15}
+            />
+        </View>
+    </Touchable>
+);
 
 class SearchView extends Component {
     constructor(props) {

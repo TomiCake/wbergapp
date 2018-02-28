@@ -13,6 +13,9 @@ export default StyleSheet.create({
         flexDirection: 'column',
         flex:1
     },
+    flex: {
+        flex: 1,
+    },
     listItemName: {
         fontWeight: '900'
     },

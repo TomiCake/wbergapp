@@ -9,7 +9,6 @@ class Page extends Component {
 
     constructor(props) {
         super(props);
-        this.props.page.page.update = () => { };
     }
     renderChildren() {
         return this.props.children;
@@ -80,7 +79,7 @@ class PromisePage extends Page {
     }
 
     loadRender(force) {
-        if (this.promise || !force && this.children) {
+        if (this.promise || !force && this.children !== undefined) {
             if (this.props.slaves) {
                 this.props.slaves.forEach((slave) => slave && slave.update && slave.update(force));
             }
@@ -92,8 +91,11 @@ class PromisePage extends Page {
                 useNativeDriver: true
             }).start();
         }
-        return this.promise = this.props.renderContent(this.props.page.page, this.state.grayOut)
+        return this.promise = this.props.renderContent(this.props.page.page, this.state.grayOut, this.props.toggleManager)
             .then((rendered) => {
+                if (rendered === undefined) {
+                    rendered = null;
+                }
                 this.children = rendered;
                 this.promise = null;
                 this.forceUpdate(() =>
@@ -113,7 +115,7 @@ class PromisePage extends Page {
     }
 
     render() {
-        if (!(this.props.left || this.props.right) && !this.children && !this.promise) {
+        if (!(this.props.left || this.props.right) && this.children === undefined && !this.promise) {
             this.loadRender();
         }
         return super.render();
@@ -127,6 +129,19 @@ export default class Swiper extends Component {
         this.setIndex(this.index);
         this.state = {
             x: new Animated.Value(0),
+            toggleManager: {
+                toggled(untoggle) {
+                    if (this.untoggle) {
+                        this.untoggle();
+                    }
+                    this.untoggle = untoggle;
+                    return true;
+                },
+
+                unToggled() {
+                    this.untoggle = null;
+                }
+            },
         }
 
         this.panResponder = props.hasPanResponder && PanResponder.create({
@@ -134,8 +149,9 @@ export default class Swiper extends Component {
             onStartShouldSetPanResponder: (evt, gestureState) => false,
             onStartShouldSetPanResponderCapture: (evt, gestureState) => false,
             onMoveShouldSetPanResponder: (evt, gestureState) => false,
-            onMoveShouldSetPanResponderCapture: (evt, gestureState) =>
-                Math.abs(gestureState.dy) < 10 && Math.abs(gestureState.dx) > 10,
+            onMoveShouldSetPanResponderCapture: (evt, gestureState) => {
+                return Math.abs(gestureState.dy) < 10 && Math.abs(gestureState.dx) > 10
+            },
 
             onPanResponderGrant: (evt, gestureState) => {
                 // The gesture has started. Show visual feedback so the user knows
@@ -235,13 +251,15 @@ export default class Swiper extends Component {
         for (i = Math.max(index - 1, this.props.minIndex); i <= Math.min(index + 1, this.props.maxIndex); i++) {
             if (this.pages[i]) {
                 newPages[i] = this.pages[i];
+                delete newPages[i].slaves;
             } else {
                 newPages[i] = { index: i, date: this.props.startDate.clone().add(i, 'week') };
             }
         }
         this.pages = newPages;
         this.masterPage = newPages[index];
-        this.masterPage.slaves = newPages.slice().splice(index);
+        this.masterPage.slaves = newPages.slice();
+        this.masterPage.slaves.splice(index, 1);
     }
 
     updatePages() {
@@ -258,7 +276,13 @@ export default class Swiper extends Component {
 
         const { renderHeaderRow, renderContent } = this.props;
         return (
-            <View style={{ position: 'absolute', height: '100%', width: '100%', flexDirection: 'column' }}>
+            <View
+                style={{
+                    position: 'absolute', height: '100%', width: '100%'
+                }}
+                {...(this.panResponder.panHandlers || {})}
+                pointerEvents="auto"
+            >
                 <View style={{ height: DATES_HEIGHT }}>
                     {left &&
                         <Page x={dateAnimation} left key={left.key} page={{ page: left }}>
@@ -276,21 +300,22 @@ export default class Swiper extends Component {
                     </Page>
                 </View>
                 <View
-                    style={{ flex: 1 }}
-                    {...(this.panResponder.panHandlers || {}) }
-                >
+                    style={{ flex: 1 }}>
                     {left &&
-                        <PromisePage x={this.state.x} left key={left.index} page={{ page: left }} renderContent={renderContent} />
+                        <PromisePage x={this.state.x} left key={left.index} page={{ page: left }} renderContent={renderContent}
+                            toggleManager={this.state.toggleManager} />
                     }
                     {right &&
-                        <PromisePage x={this.state.x} right key={right.index} page={{ page: right }} renderContent={renderContent} />
+                        <PromisePage x={this.state.x} right key={right.index} page={{ page: right }} renderContent={renderContent}
+                            toggleManager={this.state.toggleManager} />
                     }
                     <PromisePage x={this.state.x}
                         slaves={[left, right]}
                         key={this.masterPage.index}
+                        toggleManager={this.state.toggleManager}
                         page={{ page: this.masterPage }} renderContent={renderContent} />
                 </View>
-            </View >
+            </View>
         );
     }
 }

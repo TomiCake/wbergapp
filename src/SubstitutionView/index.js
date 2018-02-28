@@ -2,35 +2,17 @@ import React, { Component } from 'react';
 import { ScrollView, View, Text } from 'react-native';
 import Header from './Header';
 import styles from './styles';
-
-const colorMap = {
-    "SUBSTITUTION": "red",
-    "ASSIGNMENT": "yellow",
-    "ELIMINATION": "lime",
-    "ROOM_SUBSTITUTION": "cyan",
-    "SWAP": "gold",
-    "EXTRA_LESSON": "fuchsia",
-    "SUPERVISION": "grey",
-};
-const typeMap = {
-    "ELIMINATION": "Entfall",
-    "ROOM_SUBSTITUTION": "Raumvertretung",
-    "ASSIGNMENT": "Aufgaben",
-    "SUBSTITUTION": "Vertretung",
-    "SWAP": "Tausch",
-    "EXTRA_LESSON": "Zusatzstunde",
-    "SUPERVISION": "Mitbetreuung",
-};
+import { SUBSTITUTION_MAP } from '../const';
 
 function SubstitutionEntry(props) {
-
     return (
         <View style={styles.substitutionEntry}>
             <Text style={styles.text}>{props.classes}</Text>
             <View>
                 {props.substitutions ? props.substitutions.map((substitution, i) => {
+                    let style = SUBSTITUTION_MAP[substitution.substitutionType] || {};
                     const textStyle = {
-                        color: colorMap[substitution.substitutionType] || 'white'
+                        color: style.color || 'white'
                     };
                     return (
                         <View key={i} style={styles.row}>
@@ -59,12 +41,7 @@ function SubstitutionEntry(props) {
                             </View>
                             <View style={styles.flex}>
                                 <Text style={[styles.substitutionText, textStyle]}>
-                                    {typeMap[substitution.substitutionType] || substitution.substitutionType}
-                                </Text>
-                            </View>
-                            <View style={styles.flex}>
-                                <Text style={[styles.substitutionText, textStyle]}>
-                                    {substitution.text}
+                                    {substitution.text || style.type}
                                 </Text>
                             </View>
 
@@ -94,17 +71,19 @@ export default class SubstitutionView extends Component {
     }
 
     parse(props) {
-        let data = {};
         let day = props.date.isoWeekday();
         if (day > 5) return null;
+        let data = {};
         let masterdata = props.masterdata;
         let subs = props.substitutions[day];
         if (!subs) return null;
         subs.substitutions.forEach((substitution) => {
-            let entry = data[substitution.CLASS_IDS];
+            let classIds = substitution.CLASS_IDS;
+            if (!classIds) return;
+            let entry = data[classIds];
             if (!entry) {
-                let classes = substitution.CLASS_IDS.split(',').map((key) => masterdata.Class[key].NAME).join(',');
-                entry = data[substitution.CLASS_IDS] = { substitutions: [], classes: classes };
+                let classes = classIds.split(',').map((key) => masterdata.Class[key].NAME).join(',');
+                entry = data[classIds] = { substitutions: [], classes: classes };
             }
             entry.substitutions.push(this.translate(masterdata, substitution));
         });
@@ -115,15 +94,15 @@ export default class SubstitutionView extends Component {
 
     translate(masterdata, substitution) {
         return {
-            period: substitution.PERIOD,
+            period: substitution.PERIOD -1,
             text: substitution.TEXT,
             substitutionType: substitution.TYPE,
             teacher: masterdata.Teacher[substitution.TEACHER_ID],
             subject: masterdata.Subject[substitution.SUBJECT_ID],
             room: masterdata.Room[substitution.ROOM_ID],
-            teacherNew: masterdata.Teacher[substitution.TEACHER_ID_NEW],
-            subjectNew: masterdata.Subject[substitution.SUBJECT_ID_NEW],
-            roomNew: masterdata.Room[substitution.ROOM_ID_NEW],
+            teacherNew: masterdata.Teacher[substitution.TEACHER_ID_NEW || substitution.TEACHER_ID],
+            subjectNew: masterdata.Subject[substitution.SUBJECT_ID_NEW || substitution.SUBJECT_ID],
+            roomNew: masterdata.Room[substitution.ROOM_ID_NEW || substitution.ROOM_ID],
         };
     }
 

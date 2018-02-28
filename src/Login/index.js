@@ -4,7 +4,6 @@ import {
     Text,
     Image,
     TextInput,
-    Button,
     StatusBar,
     AsyncStorage,
     Animated,
@@ -17,17 +16,14 @@ import {
     Platform
 } from 'react-native';
 
+import { Bar } from 'react-native-progress';
+
 import { connect } from 'react-redux';
 import styles from './styles';
 import { getToken } from './api';
-
-import PropTypes from 'prop-types';
+import Button from '../components/Button';
 
 export class LoginScreen extends Component {
-
-    static propTypes = {
-        setToken: PropTypes.func.isRequired
-    }
 
     componentDidMount() {
         this.setState({ email: this.props.lastUsername });
@@ -63,85 +59,84 @@ export class LoginScreen extends Component {
 
         return (
             <View style={styles.flex}>
-                <Animated.Image
-                    source={require('../../img/bg.jpg')}
-                    style={styles.backgroundImage}
-                >
-                </Animated.Image>
-                <KeyboardAvoidingView
-                    style={[styles.container, Platform.select({ web: { alignItems: 'center', flexDirection: 'row' } })]}
-                    behavior="padding"
-                    keyboardVerticalOffset={-100}>
+                <View style={styles.backgroundContainer}>
+                    <Animated.Image
+                        source={require('../../img/bg.jpg')}
+                        style={styles.backgroundImage}
+                    >
+                    </Animated.Image>
+                </View>
+                <View style={[styles.container]}>
                     <View
-                        style={[styles.card, Platform.select({ web: styles.flex })]}>
-                        <ScrollView
-                            keyboardShouldPersistTaps="handled">
-                            <View style={styles.cardHeader}>
-                                <Text style={{ fontSize: 24 }}>
-                                    Anmeldung
+                        style={[styles.card]}>
+                        <Bar
+                            borderRadius={0}
+                            width={null}
+                            unfilledColor="#FEFEFE"
+                            color="#4CAF50"
+                            height={3}
+                            useNativeDriver={true}
+                            indeterminate={this.state.loggingIn}
+                            borderWidth={0}
+                        />
+                        <View style={styles.cardHeader}>
+                            <Text style={{ fontSize: 24 }}>
+                                Anmeldung
                                 </Text>
-                                <Image
-                                    source={require('../../img/logo.png')}
-                                    resizeMode="contain"
-                                    style={{ height: 35, width: '100%', marginBottom: 15 }}>
+                            <Image
+                                source={require('../../img/logo.png')}
+                                resizeMode="contain"
+                                style={{ height: 35, width: '100%', marginBottom: 15 }}>
 
-                                </Image>
-                            </View>
-                            <View style={styles.cardContent}>
-                                <View style={styles.row}>
-                                    <TextInput
-                                        style={[styles.input, { flex: 1 }]}
-                                        placeholder="E-Mail"
-                                        returnKeyType="next"
-                                        keyboardType="email-address"
-                                        autoCapitalize="none"
-                                        autoCorrect={false}
-                                        value={this.state.email}
-                                        blurOnSubmit={false}
-                                        onFocus={() => this.setState({ error: null })}
-                                        onSubmitEditing={() => this.refs.passwordInput.focus()}
-                                        ref="emailInput"
-                                        onChangeText={(text) => this.setState({ email: text })}
-                                    />
-                                    <Text style={{ marginTop: 10 }}>@wgmail.de</Text>
-                                </View>
+                            </Image>
+                        </View>
+                        <View style={[styles.cardContent]}>
+                            <View style={styles.row}>
                                 <TextInput
-                                    style={styles.input}
-                                    placeholder="Passwort"
-                                    returnKeyType="go"
-                                    secureTextEntry
-                                    value={this.state.password}
+                                    style={[styles.input, styles.flex]}
+                                    placeholder="E-Mail"
+                                    returnKeyType="next"
+                                    tabIndex={1}
+                                    keyboardType="email-address"
+                                    autoCapitalize="none"
+                                    autoCorrect={false}
+                                    blurOnSubmit={false}
+                                    value={this.state.email}
                                     onFocus={() => this.setState({ error: null })}
-                                    ref="passwordInput"
-                                    onSubmitEditing={this.login.bind(this)}
-                                    onChangeText={(text) => this.setState({ password: text })}
+                                    onSubmitEditing={() => this.refs.passwordInput.focus()}
+                                    ref="emailInput"
+                                    onChangeText={(text) => this.setState({ email: text })}
                                 />
-
-                                <View style={[styles.row, { justifyContent: 'space-between' }]}>
-                                    <View style={styles.flex}>
-                                        <Button
-                                            onPress={this.login.bind(this)}
-                                            title="Login"
-                                            color="#3F51B5"
-                                            disabled={this.state.loggingIn}
-                                        />
-                                    </View>
-                                    {this.state.loggingIn &&
-                                        <ActivityIndicator />}
-                                </View>
-
-                                {this.state.error ?
-                                    (<View style={styles.error}>
-                                        <Text style={{ color: 'red' }}>
-                                            {this.state.error}
-                                        </Text>
-                                    </View>)
-                                    : null
-                                }
+                                <Text style={{ marginTop: 10 }}>@wgmail.de</Text>
                             </View>
-                        </ScrollView>
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Passwort"
+                                returnKeyType="go"
+                                blurOnSubmit={false}
+                                tabIndex={2}
+                                secureTextEntry
+                                value={this.state.password}
+                                onFocus={() => this.setState({ error: null })}
+                                ref="passwordInput"
+                                onSubmitEditing={this.login.bind(this)}
+                                onChangeText={(text) => this.setState({ password: text })}
+                            />
+                            <Button
+                                onPress={this.login.bind(this)}
+                                title="Login"
+                                color="#3F51B5"
+                                disabled={this.state.loggingIn}
+                            >
+                            </Button>
+                            <View style={styles.error}>
+                                <Text style={{ color: 'red' }}>
+                                    {this.state.error || ""}
+                                </Text>
+                            </View>
+                        </View>
                     </View>
-                </KeyboardAvoidingView>
+                </View>
             </View>
         );
     }

@@ -3,8 +3,9 @@ import React, { Component } from 'react';
 import styles from './appBar.styles';
 
 import { View, Text, Image, StatusBar } from 'react-native';
-import { Icon } from 'react-native-elements';
+import Icon from '../components/Icon';
 import { Bar } from 'react-native-progress';
+
 
 export default class AppBar extends Component {
 

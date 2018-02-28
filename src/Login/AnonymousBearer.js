@@ -3,7 +3,8 @@ import { connect } from 'react-redux';
 import Login from './';
 import { ActivityIndicator, View, Text } from 'react-native';
 import styles from './styles';
-import { getToken } from './api';
+import { getAnonymousToken } from './api';
+import appConfig from '../../appConfig.js';
 
 class AnonymousBearer extends Component {
 
@@ -17,18 +18,18 @@ class AnonymousBearer extends Component {
         if (this.props.token) {
             return this.props.children;
         } else {
-            // todo: anonymous access
-            getToken("", "")
-                .then((data) => {
-                    console.log(data);
-                    this.setState({ error: null });
-                    this.props.setId(data.id);
-                    this.props.setToken(data.token);
-                })
-                .catch((error) => {
-                    console.log(error);
-                    this.setState({ error: error.message || error.error })
-                });
+            this.props.setToken(appConfig.token);
+            // getAnonymousToken(config.username, config.password)
+            //     .then((data) => {
+            //         console.log(data);
+            //         this.setState({ error: null });
+            //         this.props.setId(data.id);
+            //         this.props.setToken(data.token);
+            //     })
+            //     .catch((error) => {
+            //         console.log(error);
+            //         this.setState({ error: error.message || error.error })
+            //     });
             return (
                 <View style={styles.flex}>
                     {this.state.error ?

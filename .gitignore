@@ -54,3 +54,5 @@ buck-out/
 
 
 dist
+
+appconfig.js

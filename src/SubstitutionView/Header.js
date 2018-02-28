@@ -13,8 +13,6 @@ export default class Header extends Component {
                 <View style={styles.flex}>
                     <Text style={styles.headerText}>Wolkenberg-Gymnasium</Text>
                 </View>
-                <View style={styles.flex}>
-                </View>
             </View>
         );
     }

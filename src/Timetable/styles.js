@@ -10,8 +10,8 @@ export default StyleSheet.create({
         justifyContent: 'center',
     },
     cell: {
-        borderBottomWidth: 1,
-        borderRightWidth: 1,
+        // borderBottomWidth: 1,
+        // borderRightWidth: 1,
         borderColor: '#212121',
         backgroundColor: '#212121',
         flex: 1,

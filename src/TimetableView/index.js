@@ -6,9 +6,10 @@ import { getMasterdata, getTimetable, getSubstitutions, getSubstitutionsAll } fr
 import Timetable from '../Timetable';
 import AppBar from './AppBar';
 import moment from 'moment';
-import SearchView from '../SearchView';
+import SearchViewPublic from '../SearchView/index.public';
 import CalendarModal from './CalendarModal';
 import SubstitutionView from '../SubstitutionView';
+import { getPeriodTimesOnline } from '../common';
 
 class TimetableView extends Component {
 
@@ -18,6 +19,7 @@ class TimetableView extends Component {
             error: null,
             myTimetable: null,
             calendarModal: false,
+            startDate: moment(),
             date: moment(),
             id: this.props.id.id,
             type: this.props.id.type,
@@ -66,7 +68,7 @@ class TimetableView extends Component {
     closeCalendar(date) {
         let d = moment(date.dateString).isoWeekday(1);
         this.setState({ calendarModal: false, date: d });
-        console.log(d, this.state.date);
+        console.log(d, this.state.startDate);
     }
 
     loadMasterdata = async () => {
@@ -78,8 +80,8 @@ class TimetableView extends Component {
                 console.log("reloaded masterdata");
                 this.props.setMasterdata(masterdata);
             }
-            let substitutions = await getSubstitutionsAll(this.props.token, this.state.date.year(), this.state.date.week());
-            this.setState({ loading: null, substitutions });
+            let periodTimes = await getPeriodTimesOnline(this.props.token);
+            this.setState({ loading: null, periodTimes });
         } catch (error) {
             if (error.status === 'token_error') {
                 this.props.resetToken();
@@ -92,7 +94,6 @@ class TimetableView extends Component {
 
 
     loadForTimetable = async (week, year) => {
-
         let timetable = this.timetableStore.timetable
             || await getTimetable(this.props.token, this.state.type, this.state.id);
         this.timetableStore.timetable = timetable;
@@ -107,34 +108,26 @@ class TimetableView extends Component {
     render() {
         return (
             <View style={styles.flex}>
-
                 <View style={styles.container}>
                     {this.state.error ?
                         <View style={styles.errorContainer}>
                             <Text style={styles.error}>{this.state.error}</Text>
                             <Button title="Retry" onPress={() => this.loadData()} />
                         </View> :
-                        APP ?
-                            <Timetable
-                                date={this.state.date.isoWeekday(1).startOf('day')}
-                                loadFor={this.loadForTimetable}
-                                masterdata={this.props.masterdata}
-                                type={this.state.type}
-                                id={this.state.id}
-                                onError={(error) => this.setState({ error: error.message })}
-                            >
-                            </Timetable>
-                            :
-                            <View style={[styles.container, styles.row]}>
-                                <SubstitutionView
-                                    substitutions={this.state.substitutions}
-                                    masterdata={this.props.masterdata}
-                                    date={this.state.date}
-                                />
-                            </View>
+                        <Timetable
+                            startDate={this.state.startDate.clone().isoWeekday(1).startOf('day')}
+                            date={this.state.date.isoWeekday(1).startOf('day')}
+                            loadFor={this.loadForTimetable}
+                            masterdata={this.props.masterdata}
+                            periodTimes={this.state.periodTimes}
+                            type={this.state.type}
+                            id={this.state.id}
+                            onError={(error) => this.setState({ error: error.message })}
+                        >
+                        </Timetable>
                     }
                 </View>
-                <CalendarModal visible={this.state.calendarModal} date={this.state.date} selectDate={this.closeCalendar.bind(this)} />
+                <CalendarModal visible={this.state.calendarModal} date={this.state.startDate} selectDate={this.closeCalendar.bind(this)} />
             </View>
         );
     }

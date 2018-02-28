@@ -4,8 +4,7 @@ import {
     StyleSheet,
     Text,
     View,
-    ActivityIndicator,
-    Button
+    ActivityIndicator
 } from 'react-native';
 import { persistStore, persistCombineReducers, autoRehydrate } from 'redux-persist';
 import storage from 'redux-persist/es/storage';
@@ -18,8 +17,9 @@ import authReducer from './src/Login/reducer';
 import timetableReducer from './src/TimetableView/reducer';
 import LoginBearer from './src/Login/LoginBearer';
 import AnonymousBearer from './src/Login/AnonymousBearer';
-import TimetableContainer from './src/TimetableContainer';
+import MainContainer from './src/MainContainer';
 import { setCustomText } from 'react-native-global-props';
+import appConfig from './appConfig';
 
 setCustomText({
     style: {
@@ -50,13 +50,13 @@ export default class App extends Component {
                 <PersistGate
                     loading={<ActivityIndicator></ActivityIndicator>}
                     persistor={persistor}>
-                    {APP ?
+                    {appConfig.mode === 'app' ?
                         <LoginBearer>
-                            <TimetableContainer />
+                            <MainContainer />
                         </LoginBearer>
                         :
                         <AnonymousBearer>
-                            <TimetableContainer />
+                            <MainContainer />
                         </AnonymousBearer>
                     }
 

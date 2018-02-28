@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text, Animated } from 'react-native';
+import { View, Text, Animated, Dimensions } from 'react-native';
 import styles from './styles';
 import moment from 'moment';
 import Swiper from './Swiper';
@@ -7,13 +7,25 @@ import GridBox from './GridBox';
 
 import { WEEKDAY_NAMES, PERIOD_NUMBERS, DATES_HEIGHT } from '../const';
 import { getPeriodTimes } from '../common/periodTimes';
+import { extendZeros } from '../common/commonHelper';
+
+const PERIOD_TIMES_MIN_SCREEN_HEIGHT = 600;
 
 export default class Grid extends Component {
 
     constructor(props) {
         super(props);
+        this.state = {
+            displayPeriodTimes: Dimensions.get('window').height >= PERIOD_TIMES_MIN_SCREEN_HEIGHT
+        }
+        Dimensions.addEventListener('change', () => {
+            let displayPeriodTimes = Dimensions.get('window').height >= PERIOD_TIMES_MIN_SCREEN_HEIGHT;
+            if (this.state.displayPeriodTimes != displayPeriodTimes) {
+                this.setState({ displayPeriodTimes });
+            }
+        });
     }
-    
+
     renderColumn(i) {
         return (
             <View key={i} style={[styles.column]}>
@@ -33,7 +45,7 @@ export default class Grid extends Component {
                             {name}
                         </Text>
                         <Text style={styles.weekday} numberOfLines={1}>
-                            {page.date.clone().add(i, 'days').format("DD.MM")}
+                            {page.date.clone().add(i, 'days').format(" DD.MM")}
                         </Text>
                     </View>
                 ))}
@@ -57,12 +69,20 @@ export default class Grid extends Component {
     }
 
     renderTimeCell(i) {
-        let periodTimes = getPeriodTimes(i, this.props.secondary);
+        let periodTimes = this.state.displayPeriodTimes && (this.props.periodTimes || [])[i + 1];
         return (
-            <View key={i} style={[styles.headerCell, i % 2 == 1 ? styles.accent : null]}>
+            <View
+                key={i}
+                style={[styles.headerCell, i % 2 == 1 ? styles.accent : null]}>
                 <Text style={styles.period}>{i}</Text>
-                <Text style={styles.time}>{periodTimes.start}</Text>
-                <Text style={styles.time}>{periodTimes.end}</Text>
+                {periodTimes && [
+                    <Text style={styles.time} key={1}>
+                        {extendZeros(Math.floor(periodTimes.START_TIME / 100), 2) + ":" + extendZeros(periodTimes.START_TIME % 100, 2)}
+                    </Text>,
+                    <Text style={styles.time} key={2}>
+                        {extendZeros(Math.floor(periodTimes.END_TIME / 100), 2) + ":" + extendZeros(periodTimes.END_TIME % 100, 2)}
+                    </Text>
+                ]}
             </View>
         );
     }

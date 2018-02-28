@@ -14,5 +14,23 @@ export default StyleSheet.create({
     textInput:{
         flex:1,
         color: 'white'
+    },
+    keyboard: {
+        flexDirection: 'column',
+        justifyContent: 'center',
+    },
+    keyboardRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-around',
+    },
+    key: {
+        flex: 1,
+    },
+    keyText: {
+        color: 'black',
+        fontSize: 20,
+
+        textAlign: 'center',
     }
 });

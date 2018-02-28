@@ -42,7 +42,7 @@ export default StyleSheet.create({
     header: {
         justifyContent: 'center',
         alignItems: 'center',
-        height: 40,
+        height: 60,
         backgroundColor: '#1976D2',
         elevation: 3,
     },
