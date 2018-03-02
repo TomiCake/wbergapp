@@ -4,7 +4,7 @@ import Login from './';
 import { ActivityIndicator, View, Text } from 'react-native';
 import styles from './styles';
 import { getAnonymousToken } from './api';
-import appConfig from '../../appConfig.js';
+import appConfig from '../appConfig.js';
 
 class AnonymousBearer extends Component {
 

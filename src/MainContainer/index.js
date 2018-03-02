@@ -3,7 +3,7 @@ import { NavigationActions, StackNavigator } from 'react-navigation';
 import TimetableView from '../TimetableView';
 import TimetableViewPublic from '../TimetableView/index.public';
 import SearchView from '../SearchView';
-import appConfig from '../../appConfig';
+import appConfig from '../appConfig';
 
 const ModalStack = StackNavigator({
     Timetable: {

@@ -13,11 +13,11 @@ import { createStore } from 'redux';
 import { Provider } from 'react-redux';
 import devToolsEnhancer from 'remote-redux-devtools';
 
-import authReducer from './src/Login/reducer';
-import timetableReducer from './src/TimetableView/reducer';
-import LoginBearer from './src/Login/LoginBearer';
-import AnonymousBearer from './src/Login/AnonymousBearer';
-import MainContainer from './src/MainContainer';
+import authReducer from './Login/reducer';
+import timetableReducer from './TimetableView/reducer';
+import LoginBearer from './Login/LoginBearer';
+import AnonymousBearer from './Login/AnonymousBearer';
+import MainContainer from './MainContainer';
 import { setCustomText } from 'react-native-global-props';
 import appConfig from './appConfig';
 
