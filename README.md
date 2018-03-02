@@ -24,13 +24,6 @@ SDK Platform Android 8.0.0, API 26, revision 2
 Android Support Repository, revision 47
 ```
 
-## Web
-
-test in browser
-```
-npm run web
-```
-
 ## Contributers
 
 TomiCake  

@@ -22,8 +22,6 @@ export default class GridBox extends Component {
         } else {
             this.props.toggleManager.unToggled();
         }
-        // animated is buggy on web
-        // this.state.value.setValue(this.toggleValue ? 1 : 0);
         Animated.spring(this.state.value, {
             toValue: this.toggleValue ? 1 : 0,
         }).start();
@@ -62,7 +60,6 @@ export default class GridBox extends Component {
                 flex: 1,
             }
         }
-        // Touchable on web creates new view
         return (
             <TouchableWithoutFeedback
                 onPress={this.toggle.bind(this)}>

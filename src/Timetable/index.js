@@ -304,7 +304,7 @@ export default class Timetable extends Component {
                         renderWeek={this.renderWeek}
                         startDate={this.props.startDate}
                         periodTimes={this.props.periodTimes}
-                        hasPanResponder={Platform.OS !== 'web'}
+                        hasPanResponder
                     >
                     </Grid>
                 </View>
