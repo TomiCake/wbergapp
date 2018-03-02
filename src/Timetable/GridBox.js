@@ -36,11 +36,11 @@ export default class GridBox extends Component {
             // needs testing on all platforms
             let animationVertical = this.state.value.interpolate({
                 inputRange: [0, 1],
-                outputRange: [0, -EXPANDATION_VERTICAL],
+                outputRange: [0, -EXPANDATION_VERTICAL * (top || bottom ? 2 : 1)],
             });
             let animationHorizontal = this.state.value.interpolate({
                 inputRange: [0, 1],
-                outputRange: [0, -EXPANDATION_HORIZONTAL],
+                outputRange: [0, -EXPANDATION_HORIZONTAL * (left || right ? 2 : 1)],
             });
             var style = {
                 flex: this.props.skip + 1,
@@ -75,7 +75,12 @@ export default class GridBox extends Component {
                                 outputRange: [(this.props.backgroundColor), '#333'],
                             })
                         }]}
-                        contentContainerStyle={styles.contentContainer}>
+                        contentContainerStyle={[styles.contentContainer, {
+                            backgroundColor: 'transparent',
+                            minHeight: '100%'
+                            // this fixes wierdly Touchable bug on windows
+                            // (creates a full content view (you can see scrollindication))
+                        }]}>
                         {this.props.renderContent(this.props.horizontal, this.toggleValue)}
                     </Animated.ScrollView>
                 </Animated.View>

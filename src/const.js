@@ -24,6 +24,10 @@ export const SUBSTITUTION_MAP = {
         "type": "Raumvertretung",
         targets: ['room']
     },
+    "INFORMATION": {
+        color: "purple",
+        type: "Hinweis",
+    },
     "SWAP": {
         "color": "gold",
         "type": "Tausch"

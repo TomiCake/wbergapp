@@ -122,19 +122,21 @@ class TimetableView extends Component {
                     {this.state.error ?
                         <View style={styles.errorContainer}>
                             <Text style={styles.error}>{this.state.error}</Text>
-                            <Button title="Retry" onPress={() => this.loadData()} />
+                            <Button title="Retry" onPress={() => this.loadMasterdata()} />
                         </View> :
                         <View style={[styles.container, styles.row]}>
-                            <SubstitutionView
-                                substitutions={substitutions[0]}
-                                masterdata={this.props.masterdata}
-                                date={this.state.startDate}
-                            />
-                            <SubstitutionView
-                                substitutions={substitutions[1]}
-                                masterdata={this.props.masterdata}
-                                date={tomorrow}
-                            />
+                            <View style={[styles.flex, styles.row]}>
+                                <SubstitutionView
+                                    substitutions={substitutions[0]}
+                                    masterdata={this.props.masterdata}
+                                    date={this.state.startDate}
+                                />
+                                <SubstitutionView
+                                    substitutions={substitutions[1]}
+                                    masterdata={this.props.masterdata}
+                                    date={tomorrow}
+                                />
+                            </View>
                             <View style={styles.container}>
                                 <AppBarPublic
                                     information={information}
@@ -163,7 +165,7 @@ class TimetableView extends Component {
                         </View>
                     }
                 </View>
-                
+
             </View>
         );
     }
