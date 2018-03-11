@@ -1,10 +1,13 @@
-export const API_URL = 'https://www.wolkenberg-gymnasium.de/wolkenberg-app/api';
+export const API_URL = 'https://www.wolkenberg-gymnasium.de/wolkenberg-app/api/';
 
 export const WEEKDAY_NAMES = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag'];
 export const PERIOD_NUMBERS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
 export const PERIOD_BGCOLOR = '#3e2723';
 export const HOLIDAY_BGCOLOR = '#33691e';
+export const HEADER_BGCOLOR = "#1976D2";
+export const BGCOLOR = "#212121";
+export const BGCOLOR_ACCENT = "#1b1b1b";    
 export const DATES_HEIGHT = 40;
 export const SUBSTITUTION_MAP = {
     "SUBSTITUTION": {

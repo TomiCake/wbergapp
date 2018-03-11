@@ -1,9 +1,10 @@
 import { StyleSheet } from 'react-native';
+import { HEADER_BGCOLOR, BGCOLOR, BGCOLOR_ACCENT } from '../const';
 
 export default StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#212121',
+        backgroundColor: BGCOLOR,
         padding: 10,
     },
     row: {
@@ -13,7 +14,7 @@ export default StyleSheet.create({
     table: {
         flexDirection: 'column',
         flex: 1,
-        backgroundColor: '#1b1b1b',
+        backgroundColor: BGCOLOR_ACCENT,
     },
     text: {
         color: 'white',
@@ -43,7 +44,7 @@ export default StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         height: 60,
-        backgroundColor: '#1976D2',
+        backgroundColor: HEADER_BGCOLOR,
         elevation: 3,
     },
     headerText: {

@@ -10,6 +10,7 @@ import SearchViewPublic from '../SearchView/index.public';
 import CalendarModal from './CalendarModal';
 import SubstitutionView from '../SubstitutionView';
 import { getPeriodTimesOnline } from '../common';
+import { getMasterdataAll, getMasterdataVersion } from './actions';
 
 class TimetableView extends Component {
 
@@ -29,8 +30,16 @@ class TimetableView extends Component {
 
     }
 
+
+    componentWillReceiveProps(props) {
+        if (props.masterdataVersionChanged) {
+            this.props.getMasterdataAll();
+        }
+    }
+    
     componentDidMount() {
-        this.loadMasterdata();
+        this.loadData();
+        this.props.getMasterdataVersion();
     }
 
     onSelect(id, type) {
@@ -55,16 +64,9 @@ class TimetableView extends Component {
         console.log(d, this.state.startDate);
     }
 
-    loadMasterdata = async () => {
+    loadData = async () => {
         try {
             this.setState({ loading: "Anzeigedaten", error: null, myTimetable: null });
-            let version = (await getMasterdata(this.props.token, 'version')).version;
-            if (this.props.masterdataVersion !== version) {
-                let masterdata = await getMasterdata(this.props.token, 'all');
-                console.log("reloaded masterdata");
-                this.props.setMasterdata(masterdata);
-            }
-            let periodTimes = await getPeriodTimesOnline(this.props.token);
             let date = this.state.startDate.clone();
             let substitutions = await getSubstitutionsAll(this.props.token, date.year(), date.isoWeek());
 
@@ -77,7 +79,7 @@ class TimetableView extends Component {
                     await getSubstitutionsAll(this.props.token, date.year(), date.isoWeek());
             }
 
-            this.setState({ loading: null, substitutionsArray, periodTimes });
+            this.setState({ loading: null, substitutionsArray });
         } catch (error) {
             if (error.status === 'token_error') {
                 this.props.resetToken();
@@ -108,7 +110,7 @@ class TimetableView extends Component {
             tomorrow = tomorrow.add(1, 'day');
         } while (tomorrow.isoWeekday() > 5);
 
-        if (this.props.masterdata.version && this.state.type) {
+        if (this.props.masterdata && this.state.type) {
             let object = this.props.masterdata[this.state.type[0].toUpperCase() + this.state.type.slice(1)][this.state.id];
             var information = {
                 type: this.state.type,
@@ -122,7 +124,7 @@ class TimetableView extends Component {
                     {this.state.error ?
                         <View style={styles.errorContainer}>
                             <Text style={styles.error}>{this.state.error}</Text>
-                            <Button title="Retry" onPress={() => this.loadMasterdata()} />
+                            <Button title="Retry" onPress={() => this.loadData()} />
                         </View> :
                         <View style={[styles.container, styles.row]}>
                             <View style={[styles.flex, styles.row]}>
@@ -152,7 +154,7 @@ class TimetableView extends Component {
                                         date={this.state.date.isoWeekday(1).startOf('day')}
                                         type={this.state.type}
                                         id={this.state.id}
-                                        periodTimes={this.state.periodTimes}
+                                        periodTimes={this.props.periodTimes}
                                         loadFor={this.loadForTimetable}
                                         masterdata={this.props.masterdata}
                                         onError={(error) => this.setState({ error: error.message })}
@@ -174,13 +176,15 @@ class TimetableView extends Component {
 export default connect((state) => {
     return {
         token: state.auth.token,
-        masterdata: state.timetable.masterdata,
-        masterdataVersion: state.timetable.masterdata.version,
+        masterdata: state.masterdata.masterdata,
+        periodTimes: state.masterdata.masterdata.Period_Time,
+        masterdataVersionChanged: state.masterdata.masterdata.versionChanged,
         id: state.auth.id
     };
 }, (dispatch) => {
     return {
-        setMasterdata: (masterdata) => dispatch({ type: 'SET_MASTERDATA', payload: masterdata }),
-        resetToken: () => dispatch({ type: 'SET_TOKEN', payload: null })
+        resetToken: () => dispatch({ type: 'SET_TOKEN', payload: null }),
+        getMasterdataAll: () => dispatch(getMasterdataAll()),
+        getMasterdataVersion: () => dispatch(getMasterdataVersion()),
     }
 })(TimetableView);

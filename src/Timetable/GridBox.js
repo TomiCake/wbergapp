@@ -74,7 +74,8 @@ export default class GridBox extends Component {
                         }]}
                         contentContainerStyle={[styles.contentContainer, {
                             backgroundColor: 'transparent',
-                            minHeight: '100%'
+                            minHeight: '100%',
+                            justifyContent: 'center',
                             // this fixes wierdly Touchable bug on windows
                             // (creates a full content view (you can see scrollindication))
                         }]}>

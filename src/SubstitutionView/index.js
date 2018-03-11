@@ -104,6 +104,9 @@ export default class SubstitutionView extends Component {
     }
 
     render() {
+        if (!this.props.masterdata) {
+            return null;
+        }
         return (
             <View style={styles.container}>
                 <Header date={this.props.date} />

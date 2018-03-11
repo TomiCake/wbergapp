@@ -14,7 +14,7 @@ class LoginBearer extends Component {
 }
 
 export default connect((state) => {
-    return { 
-        token: state.auth.token
+    return {
+        token: state.auth.token && state.auth.id
     };
 })(LoginBearer);

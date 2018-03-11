@@ -20,11 +20,13 @@
     "react-navigation": "^1.1.2",
     "react-redux": "^5.0.6",
     "redux": "^3.7.2",
-    "redux-persist": "^5.9.1"
+    "redux-persist": "^5.9.1",
+    "superagent": "^3.8.2"
   },
   "devDependencies": {
     "jest": "22.0.4",
     "react-test-renderer": "16.0.0",
+    "redux-devtools-extension": "^2.13.2",
     "remote-redux-devtools": "^0.5.12",
     "rnpm-plugin-windows": "^0.2.8"
   },

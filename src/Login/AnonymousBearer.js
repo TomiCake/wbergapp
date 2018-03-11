@@ -32,10 +32,10 @@ class AnonymousBearer extends Component {
             //     });
             return (
                 <View style={styles.flex}>
-                    {this.state.error ?
+                    {this.props.error ?
                         (<View style={styles.error}>
                             <Text style={{ color: 'red' }}>
-                                {this.state.error}
+                                {this.props.error}
                             </Text>
                         </View>)
                         :
@@ -55,11 +55,7 @@ export default connect((state) => {
     return {
         setToken: (token) => dispatch({
             type: 'SET_TOKEN',
-            payload: token
-        }),
-        setId: (id) => dispatch({
-            type: 'SET_ID',
-            payload: id
-        }),
+            payload: token,
+        })
     }
 })(AnonymousBearer);

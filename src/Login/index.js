@@ -22,36 +22,20 @@ import { connect } from 'react-redux';
 import styles from './styles';
 import { getToken } from './api';
 import Button from '../components/Button';
+import { login } from './actions';
 
 export class LoginScreen extends Component {
-
-    componentDidMount() {
-        this.setState({ email: this.props.lastUsername });
-    }
-
-
     constructor(props) {
         super(props);
         this.state = {
+            username: props.username,
         };
     }
 
 
     login() {
         Keyboard.dismiss(); // Dismissing manually
-        this.setState({ loggingIn: true });
-        this.props.setLastUsername(this.state.email);
-        getToken(this.state.email, this.state.password)
-            .then((data) => {
-                console.log(data);
-                this.setState({ error: null, loggingIn: false });
-                this.props.setId(data.id);
-                this.props.setToken(data.token);
-            })
-            .catch((error) => {
-                console.log(error);
-                this.setState({ error: error.message || error.error, loggingIn: false })
-            });
+        this.props.login(this.state.email, this.state.password);
     }
 
 
@@ -76,7 +60,7 @@ export class LoginScreen extends Component {
                             color="#4CAF50"
                             height={3}
                             useNativeDriver={true}
-                            indeterminate={this.state.loggingIn}
+                            indeterminate={this.props.loading}
                             borderWidth={0}
                         />
                         <View style={styles.cardHeader}>
@@ -126,12 +110,12 @@ export class LoginScreen extends Component {
                                 onPress={this.login.bind(this)}
                                 title="Login"
                                 color="#3F51B5"
-                                disabled={this.state.loggingIn}
+                                disabled={this.props.loading}
                             >
                             </Button>
                             <View style={styles.error}>
                                 <Text style={{ color: 'red' }}>
-                                    {this.state.error || ""}
+                                    {this.props.error && this.props.error.error || this.props.error}
                                 </Text>
                             </View>
                         </View>
@@ -145,23 +129,12 @@ export class LoginScreen extends Component {
 
 export default connect((state, ownProps) => {
     return {
-        lastUsername: state.auth.lastUsername
+        username: state.auth.username,
+        loading: state.auth.loading,
+        error: state.auth.error
     }
 }, (dispatch) => {
     return {
-        setToken: (token) => dispatch({
-            type: 'SET_TOKEN',
-            payload: token
-        }),
-        setId: (id) => dispatch({
-            type: 'SET_ID',
-            payload: id
-        }),
-        setLastUsername: (username) => {
-            return dispatch({
-                type: 'SET_LAST_USERNAME',
-                username
-            })
-        }
+        login: (username, password) => dispatch(login(username, password)),
     }
 })(LoginScreen);

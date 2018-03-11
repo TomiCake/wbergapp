@@ -1,15 +1,16 @@
 import { StyleSheet } from 'react-native';
+import { HEADER_BGCOLOR } from '../const';
 
 export default StyleSheet.create({
     appBar: {
         flexDirection: 'column',
         height: 60,
-        backgroundColor: '#1976D2',
+        backgroundColor: HEADER_BGCOLOR,
     },
     firstRow: {
         flex: 1,
         alignItems: 'center',
-        justifyContent: 'space-around',
+        justifyContent: 'space-between',
         flexDirection: 'row',
         paddingTop: 4,
         paddingHorizontal: 8,

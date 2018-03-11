@@ -55,13 +55,14 @@ class SearchView extends Component {
             [...result,
             ...Object.keys(masterdata[type]).map((key) => ({
                 name: masterdata[type][key].LASTNAME ?
-                    masterdata[type][key].LASTNAME + ", " + masterdata[type][key].FIRSTNAME :
+                    (masterdata[type][key].LASTNAME + ", " + masterdata[type][key].FIRSTNAME) :
                     masterdata[type][key].NAME,
                 filtername: masterdata[type][key].NAME + " " + masterdata[type][key].LASTNAME + " " + masterdata[type][key].FIRSTNAME + " " + masterdata[type][key].LASTNAME,
                 typeName: ["Klassen", "Räume", "Schüler", "Lehrer"][i],
                 type: type.toLowerCase(),
                 id: key
             }))
+                .sort((o1, o2) => o1.name.localeCompare(o2.name))
             ]
             , []);
     }
@@ -86,7 +87,7 @@ class SearchView extends Component {
             <View style={styles.flex}>
                 <AppBar onChangeText={this.onChangeText.bind(this)} public goBack={() => { }} />
                 <FlatList
-                    style={styles.flex}    
+                    style={[styles.flex, styles.list]}
                     ref="list"
                     keyboardShouldPersistTaps={'handled'}
                     renderItem={({ item, index }) => (<ListItem
@@ -111,6 +112,6 @@ class SearchView extends Component {
 
 export default connect((state) => {
     return {
-        masterdata: state.timetable.masterdata,
+        masterdata: state.masterdata.masterdata,
     };
 })(SearchView);

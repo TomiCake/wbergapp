@@ -92,6 +92,6 @@ class SearchView extends Component {
 
 export default connect((state) => {
     return {
-        masterdata: state.timetable.masterdata,
+        masterdata: state.masterdata.masterdata,
     };
 })(SearchView);

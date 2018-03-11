@@ -9,7 +9,7 @@ import Icon from '../components/Icon';
 const Key = (props) => (
     <View style={styles.key}>
         <Touchable
-            onPress={props.onPress}>
+            onPress={props.onPress} onLongPress={props.longPressName && props.onLongPress}>
             <Text style={styles.keyText}>
                 {props.name}
             </Text>
@@ -66,10 +66,16 @@ export default class AppBar extends Component {
                     {["0123456789", "QWERTZUIOP", "ASDFGHJKL", "YXCVBNM"].map((row, j) => (
                         <View style={styles.keyboardRow} key={j}>
                             {row.split('').map((name, i) => (
-                                <Key key={i} onPress={this.onKeyPress.bind(this, name)} name={name} />
+                                <Key key={i} onPress={this.onKeyPress.bind(this, name)}
+                                    name={name}
+                                    longPressName={{ O: "Ö", A: 'Ä', U: 'Ü' }[name]}
+                                    onLongPress={this.onKeyPress.bind(this, { O: "Ö", A: 'Ä', U: 'Ü' }[name])} />
                             ))}
                         </View>
                     ))}
+                    <View style={styles.keyboardRow} key={5}>
+                        <Key onPress={this.onKeyPress.bind(this, " ")} name={"SPACE"} />
+                    </View>
                 </View>
 
             </View>

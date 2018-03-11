@@ -18,6 +18,12 @@ export default class AppBar extends Component {
             <View style={styles.appBar}>
                 <View style={styles.firstRow}>
                     <StatusBar backgroundColor={"#1976D2"} />
+                    <Icon
+                        iconStyle={styles.button}    
+                        name='menu'
+                        color="white"
+                        onPress={this.open.bind(this, "DrawerOpen")}
+                        />
                     <Image
                         source={require('../../img/logowhite.png')}
                         resizeMode="contain"

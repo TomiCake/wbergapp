@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { NavigationActions, StackNavigator } from 'react-navigation';
+import { NavigationActions, StackNavigator, DrawerNavigator } from 'react-navigation';
 import TimetableView from '../TimetableView';
 import TimetableViewPublic from '../TimetableView/index.public';
 import SearchView from '../SearchView';
@@ -16,11 +16,9 @@ const ModalStack = StackNavigator({
     },
 });
 
-class MainView extends Component {
-    render() {
-        return (
-            <ModalStack ref={nav => { this.navigator = nav; }} />
-        );
-    }
-}
+const MainView = DrawerNavigator({
+    Timetable: {
+        screen: ModalStack,
+    },
+});
 export default appConfig.mode === 'app' ? MainView : TimetableViewPublic;

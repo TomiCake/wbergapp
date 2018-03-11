@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { BGCOLOR, BGCOLOR_ACCENT } from '../const';
 
 export default StyleSheet.create({
     row: {
@@ -12,8 +13,8 @@ export default StyleSheet.create({
     cell: {
         // borderBottomWidth: 1,
         // borderRightWidth: 1,
-        borderColor: '#212121',
-        backgroundColor: '#212121',
+        borderColor: BGCOLOR,
+        backgroundColor: BGCOLOR,
         flex: 1,
     },
     headerColumn: {
@@ -31,7 +32,7 @@ export default StyleSheet.create({
         paddingHorizontal: 10,
         justifyContent: 'center',
         flex: 1,
-        backgroundColor: '#212121',
+        backgroundColor: BGCOLOR,
         alignItems: 'center',
         width: 40,
     },
@@ -49,20 +50,16 @@ export default StyleSheet.create({
         flexWrap: 'wrap',
         flex: 1,
     },
-
     period: {
         color: 'white'
     },
-
     time: {
         fontSize: 7,
         color: 'white'
     },
-    
     accent: {
-        backgroundColor: '#1b1b1b'
+        backgroundColor: BGCOLOR_ACCENT
     },
-
     container: {
         flex: 1,
     },

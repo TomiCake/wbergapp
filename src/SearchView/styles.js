@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { BGCOLOR_ACCENT } from '../const';
 
 export default StyleSheet.create({
     listItem: {
@@ -13,13 +14,17 @@ export default StyleSheet.create({
         flexDirection: 'column',
         flex:1
     },
+    list: {
+        backgroundColor: BGCOLOR_ACCENT,
+    },
     flex: {
         flex: 1,
     },
     listItemName: {
-        fontWeight: '900'
+        fontWeight: '900',
+        color: 'white',
     },
     listItemType: {
-        color: "#666666"
+        color: "#ddd"
     }
 });
